@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>School LMS - Complete System for Admin, Teachers & Students</title>
+  <title>SmartSchool LMS - Complete Learning Management System</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -540,7 +540,7 @@
     <!-- Animated Marquee Section -->
     <div class="marquee-container">
       <marquee behavior="scroll" direction="left" scrollamount="5">
-        🏫 Welcome to School LMS - Complete Learning Management System! 📚 | 
+        🏫 Welcome to SmartSchool LMS - Complete Learning Management System! 📚 | 
         👑 Admin: Manage all teachers and students! | 
         👨‍🏫 Teachers: Create quizzes and track progress! | 
         👨‍🎓 Students: Take quizzes and improve scores! | 
@@ -550,7 +550,7 @@
 
     <!-- Navigation -->
     <div class="navbar" id="navbar" style="display: none;">
-      <div class="logo">🏫 School LMS</div>
+      <div class="logo">🏫 SmartSchool LMS</div>
       <div class="nav-links" id="nav-links"></div>
       <div class="user-badge">
         <span id="user-name">User</span>
@@ -562,7 +562,7 @@
     <!-- Auth Section -->
     <div id="auth-section" class="card" style="max-width: 500px; margin: 100px auto;">
       <div class="card-header">
-        <h2 class="card-title">🎓 Welcome to School LMS</h2>
+        <h2 class="card-title">🎓 Welcome to SmartSchool LMS</h2>
       </div>
       <marquee behavior="scroll" direction="right" scrollamount="3" style="margin-bottom: 20px; color: #14b8a6; font-size: 12px;">
         ⭐ Login to start your learning journey! ⭐
@@ -871,17 +871,11 @@
     </div>
   </div>
 
+  <!-- 🔐 IMPORTANT: Load config.js FIRST (contains Firebase keys - hidden from GitHub) -->
+  <script src="config.js"></script>
+  
   <script>
-    // Firebase Config (Replace with your own)
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
+    // Initialize Firebase (config is loaded from config.js)
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -938,7 +932,7 @@
       const school = document.getElementById('reg-school').value;
 
       if (!name || !email || !password || !school) {
-        showError('register-form', '⚠️ Please fill all fields');
+        showError('⚠️ Please fill all fields');
         return;
       }
 
@@ -948,8 +942,9 @@
           name, email, role, school, createdAt: new Date()
         });
         showLogin();
+        alert('✅ Registration successful! Please login.');
       } catch (error) {
-        showError('register-form', error.message);
+        showError(error.message);
       }
     }
 
@@ -958,16 +953,21 @@
       const password = document.getElementById('login-password').value;
       const role = document.getElementById('login-role').value;
 
+      if (!email || !password) {
+        showError('Please enter email and password');
+        return;
+      }
+
       try {
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
         const userDoc = await db.collection('users').doc(userCredential.user.uid).get();
         if (userDoc.exists && userDoc.data().role !== role) {
           await auth.signOut();
-          showError('login-form', `⚠️ You are registered as ${userDoc.data().role}`);
+          showError(`⚠️ You are registered as ${userDoc.data().role}`);
           return;
         }
       } catch (error) {
-        showError('login-form', error.message);
+        showError(error.message);
       }
     }
 
@@ -985,7 +985,7 @@
       document.getElementById('login-form').classList.remove('hidden');
     }
 
-    function showError(formId, message) {
+    function showError(message) {
       const errorDiv = document.getElementById('auth-error');
       errorDiv.textContent = message;
       errorDiv.classList.remove('hidden');
@@ -998,7 +998,6 @@
       document.getElementById('teacher-dashboard').classList.add('hidden');
       document.getElementById('student-dashboard').classList.add('hidden');
       
-      // Load stats
       const teachers = await db.collection('users').where('role', '==', 'teacher').get();
       const students = await db.collection('users').where('role', '==', 'student').get();
       const quizzes = await db.collection('quizzes').get();
@@ -1032,19 +1031,19 @@
       document.getElementById('admin-analytics-tab').classList.add('hidden');
       
       if (tab === 'teachers') {
-        document.querySelector('.admin-tab:first-child').classList.add('active');
+        document.querySelectorAll('.admin-tab')[0].classList.add('active');
         document.getElementById('admin-teachers-tab').classList.remove('hidden');
         loadTeachersList();
       } else if (tab === 'students') {
-        document.querySelector('.admin-tab:nth-child(2)').classList.add('active');
+        document.querySelectorAll('.admin-tab')[1].classList.add('active');
         document.getElementById('admin-students-tab').classList.remove('hidden');
         loadStudentsList();
       } else if (tab === 'quizzes') {
-        document.querySelector('.admin-tab:nth-child(3)').classList.add('active');
+        document.querySelectorAll('.admin-tab')[2].classList.add('active');
         document.getElementById('admin-quizzes-tab').classList.remove('hidden');
         loadAllQuizzes();
       } else if (tab === 'analytics') {
-        document.querySelector('.admin-tab:nth-child(4)').classList.add('active');
+        document.querySelectorAll('.admin-tab')[3].classList.add('active');
         document.getElementById('admin-analytics-tab').classList.remove('hidden');
         loadAnalytics();
       }
@@ -1065,7 +1064,7 @@
               <small>📋 Quizzes Created: ${teacherQuizzes.size}</small>
             </div>
             <div>
-              <button class="btn btn-warning" onclick="resetUserPassword('${teacher.id}', '${teacher.email}')">🔑 Reset Password</button>
+              <button class="btn btn-warning" onclick="resetUserPassword('${teacher.email}')">🔑 Reset Password</button>
               <button class="btn btn-danger" onclick="deleteUser('${teacher.id}')">🗑️ Delete</button>
             </div>
           </div>
@@ -1090,7 +1089,7 @@
               <small>📝 Quizzes Taken: ${results.size} | 📊 Avg Score: ${Math.round(avgScore)}%</small>
             </div>
             <div>
-              <button class="btn btn-warning" onclick="resetUserPassword('${student.id}', '${student.email}')">🔑 Reset Password</button>
+              <button class="btn btn-warning" onclick="resetUserPassword('${student.email}')">🔑 Reset Password</button>
               <button class="btn btn-danger" onclick="deleteUser('${student.id}')">🗑️ Delete</button>
             </div>
           </div>
@@ -1208,7 +1207,7 @@
       }
     }
 
-    async function resetUserPassword(userId, email) {
+    async function resetUserPassword(email) {
       try {
         await auth.sendPasswordResetEmail(email);
         alert(`✅ Password reset email sent to ${email}`);
@@ -1254,7 +1253,7 @@
               <small>📋 Quizzes Created: ${teacherQuizzes.size}</small>
             </div>
             <div>
-              <button class="btn btn-warning" onclick="resetUserPassword('${teacher.id}', '${teacher.email}')">🔑 Reset Password</button>
+              <button class="btn btn-warning" onclick="resetUserPassword('${teacher.email}')">🔑 Reset Password</button>
               <button class="btn btn-danger" onclick="deleteUser('${teacher.id}')">🗑️ Delete</button>
             </div>
           </div>
@@ -1281,7 +1280,7 @@
               <small>📝 Quizzes Taken: ${results.size} | 📊 Avg Score: ${Math.round(avgScore)}%</small>
             </div>
             <div>
-              <button class="btn btn-warning" onclick="resetUserPassword('${student.id}', '${student.email}')">🔑 Reset Password</button>
+              <button class="btn btn-warning" onclick="resetUserPassword('${student.email}')">🔑 Reset Password</button>
               <button class="btn btn-danger" onclick="deleteUser('${student.id}')">🗑️ Delete</button>
             </div>
           </div>
