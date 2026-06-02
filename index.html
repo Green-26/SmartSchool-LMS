@@ -2,13 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartSchool LMS - Complete Learning Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>SmartSchool Pro | Bloom's Taxonomy LMS for Rwanda</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   
   <style>
     * {
@@ -17,15 +20,34 @@
       box-sizing: border-box;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
-      min-height: 100vh;
-      color: #1e293b;
-      overflow-x: hidden;
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5a67d8;
+      --primary-light: #a3bffa;
+      --secondary: #764ba2;
+      --bloom-l1: #3b82f6;
+      --bloom-l2: #10b981;
+      --bloom-l3: #f59e0b;
+      --bloom-l4: #f97316;
+      --bloom-l5: #ef4444;
+      --bloom-l6: #8b5cf6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --dark: #1f2937;
+      --gray: #6b7280;
+      --light: #f9fafb;
     }
 
-    /* Animated Background */
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: var(--dark);
+      position: relative;
+    }
+
+    /* Animated background particles */
     body::before {
       content: '';
       position: fixed;
@@ -33,15 +55,16 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path fill="%2314b8a6" d="M10,10 L20,5 L30,10 L25,20 L15,20 Z"/><circle cx="70" cy="30" r="8"/><circle cx="85" cy="70" r="5"/><circle cx="30" cy="80" r="6"/></svg>') repeat;
+      background-image: radial-gradient(circle at 20% 40%, rgba(255,255,255,0.1) 2px, transparent 2px),
+                        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 50px 50px, 30px 30px;
       pointer-events: none;
-      z-index: 0;
-      animation: floatBackground 20s linear infinite;
+      animation: floatBG 30s linear infinite;
     }
 
-    @keyframes floatBackground {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(50px, 50px); }
+    @keyframes floatBG {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(100px, 50px) rotate(360deg); }
     }
 
     .container {
@@ -49,405 +72,163 @@
       margin: 0 auto;
       padding: 20px;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }
 
-    /* Animated Marquee */
-    .marquee-container {
-      background: linear-gradient(90deg, #14b8a6, #0d9488);
-      border-radius: 50px;
-      margin-bottom: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+    /* Glassmorphism Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(12px);
+      border-radius: 32px;
+      padding: 28px;
+      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25);
+      transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
 
-    marquee {
-      padding: 12px;
-      color: white;
-      font-weight: 500;
-      font-size: 14px;
+    .glass-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 30px 55px -15px rgba(0, 0, 0, 0.3);
     }
 
     /* Navigation */
     .navbar {
-      background: white;
-      border-radius: 16px;
-      padding: 16px 24px;
-      margin-bottom: 24px;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 80px;
+      padding: 12px 28px;
+      margin-bottom: 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      animation: slideDown 0.5s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
       flex-wrap: wrap;
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .logo {
-      font-size: 20px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea, #764ba2);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .nav-btn {
-      background: none;
-      border: none;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      color: #64748b;
-    }
-
-    .nav-btn:hover {
-      background: #14b8a6;
-      color: white;
-      transform: translateY(-2px);
-    }
-
-    .nav-btn.active {
-      background: #14b8a6;
-      color: white;
-    }
-
-    .user-badge {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 6px 12px;
-      background: #f1f5f9;
-      border-radius: 30px;
-      animation: fadeIn 0.5s ease;
-    }
-
-    .user-role {
-      font-size: 12px;
-      padding: 2px 8px;
-      border-radius: 20px;
-      color: white;
-    }
-
-    .role-admin { background: #8b5cf6; }
-    .role-teacher { background: #14b8a6; }
-    .role-student { background: #f59e0b; }
-
-    .logout-btn {
-      background: #ef4444;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.3s ease;
-    }
-
-    .logout-btn:hover {
-      background: #dc2626;
-      transform: scale(1.05);
-    }
-
-    /* Cards with Animation */
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-      margin-bottom: 24px;
-      animation: fadeInUp 0.5s ease;
-      transition: all 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(20, 184, 166, 0.15);
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid #f1f5f9;
-      flex-wrap: wrap;
       gap: 10px;
     }
 
-    .card-title {
-      font-size: 20px;
+    /* Bloom Badges */
+    .bloom-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 12px;
       font-weight: 600;
-      color: #0f766e;
-    }
-
-    /* Dashboard Grid */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      margin-bottom: 24px;
-    }
-
-    /* Animated Stat Cards */
-    .stat-card {
-      background: linear-gradient(135deg, #14b8a6, #0d9488);
       color: white;
-      padding: 24px;
-      border-radius: 20px;
-      text-align: center;
-      transition: all 0.3s ease;
-      animation: fadeInUp 0.5s ease;
+    }
+    .bloom-l1 { background: var(--bloom-l1); }
+    .bloom-l2 { background: var(--bloom-l2); }
+    .bloom-l3 { background: var(--bloom-l3); }
+    .bloom-l4 { background: var(--bloom-l4); }
+    .bloom-l5 { background: var(--bloom-l5); }
+    .bloom-l6 { background: var(--bloom-l6); }
+
+    /* Stat Cards */
+    .stat-card {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 28px;
+      padding: 28px;
+      color: white;
       position: relative;
       overflow: hidden;
+      transition: transform 0.3s;
     }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-      animation: shimmer 3s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translate(-30%, -30%) rotate(0deg); }
-      100% { transform: translate(30%, 30%) rotate(360deg); }
-    }
-
-    .stat-card:hover {
-      transform: translateY(-5px) scale(1.02);
-    }
-
-    .stat-value {
-      font-size: 36px;
-      font-weight: 700;
-      animation: countUp 1s ease;
-    }
-
-    @keyframes countUp {
-      from { opacity: 0; transform: scale(0.5); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .stat-label {
-      font-size: 14px;
-      opacity: 0.9;
-      margin-top: 8px;
-    }
+    .stat-card:hover { transform: translateY(-5px) scale(1.02); }
+    .stat-value { font-size: 48px; font-weight: 800; letter-spacing: -1px; }
+    .stat-label { font-size: 14px; opacity: 0.9; margin-top: 8px; }
 
     /* Forms */
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 6px;
-      color: #475569;
-    }
-
     input, select, textarea {
       width: 100%;
-      padding: 12px;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 20px;
       font-size: 14px;
-      transition: all 0.3s ease;
+      transition: all 0.2s;
+      background: white;
     }
-
-    input:focus, select:focus, textarea:focus {
+    input:focus, select:focus {
       outline: none;
-      border-color: #14b8a6;
-      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
-      transform: scale(1.01);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
     }
 
     /* Buttons */
     .btn {
       padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
       border: none;
-      border-radius: 10px;
       font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
     }
-
     .btn-primary {
-      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
     }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102,126,234,0.4); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
-    }
-
-    .btn-secondary {
-      background: #f1f5f9;
-      color: #475569;
-    }
-
-    .btn-secondary:hover {
-      background: #e2e8f0;
-      transform: translateY(-2px);
-    }
-
-    .btn-danger {
-      background: #ef4444;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background: #dc2626;
-      transform: translateY(-2px);
-    }
-
-    .btn-warning {
-      background: #f59e0b;
-      color: white;
-    }
-
-    .btn-warning:hover {
-      background: #d97706;
-      transform: translateY(-2px);
-    }
-
-    /* Tables */
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .data-table th, .data-table td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .data-table th {
-      background: #f8fafc;
+    /* Google Button */
+    .google-btn {
+      background: white;
+      color: #444;
+      border: 2px solid #e0e0e0;
+      padding: 12px 24px;
+      border-radius: 50px;
       font-weight: 600;
-      color: #475569;
-    }
-
-    .data-table tr {
-      transition: all 0.3s ease;
-    }
-
-    .data-table tr:hover {
-      background: #f0fdfa;
-      transform: scale(1.01);
-    }
-
-    /* Quiz Options */
-    .quiz-option {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: #f8fafc;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      margin-bottom: 10px;
       cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .quiz-option:hover {
-      border-color: #14b8a6;
-      background: #f0fdfa;
-      transform: translateX(5px);
-    }
-
-    .quiz-option.selected {
-      border-color: #14b8a6;
-      background: #f0fdfa;
-      animation: bounce 0.3s ease;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(5px); }
-    }
-
-    .quiz-option-letter {
-      width: 32px;
-      height: 32px;
-      background: #e2e8f0;
-      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      gap: 12px;
+      width: 100%;
+    }
+    .google-btn:hover { background: #f8f9fa; transform: translateY(-2px); }
+
+    /* Quiz Option */
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: #f8fafc;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .quiz-option.selected {
+      border-color: var(--primary);
+      background: #e6fffa;
+      transform: translateX(8px);
     }
 
-    /* Hidden */
-    .hidden {
-      display: none;
-    }
-
-    /* Alerts */
-    .alert {
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 16px;
-      animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    .alert-success {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      color: #16a34a;
-    }
-
-    .alert-error {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
+    /* Timer */
+    .timer {
+      font-size: 32px;
+      font-weight: 800;
+      font-family: monospace;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: inline-block;
+      padding: 10px 30px;
+      border-radius: 60px;
+      color: white;
     }
 
     /* Modal */
@@ -457,1166 +238,307 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
       z-index: 1000;
-      overflow-y: auto;
-      padding: 40px;
-      animation: fadeIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
-
-    .modal-content {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    /* Timer */
-    .timer {
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-      color: #14b8a6;
-      margin: 16px 0;
-      animation: pulse 1s infinite;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .navbar {
-        flex-direction: column;
-        gap: 12px;
-      }
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-      .data-table {
-        font-size: 12px;
-      }
-      .stat-value {
-        font-size: 28px;
-      }
-      .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
+    .modal-content { max-width: 750px; width: 100%; max-height: 85vh; overflow-y: auto; }
 
     /* Tabs */
-    .admin-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
+    .admin-tabs { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
     .admin-tab {
-      padding: 10px 20px;
-      background: #f1f5f9;
-      border: none;
-      border-radius: 10px;
+      padding: 10px 24px;
+      background: #f3f4f6;
+      border-radius: 40px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
+      font-weight: 600;
     }
+    .admin-tab.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
 
-    .admin-tab.active {
-      background: #14b8a6;
-      color: white;
-    }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 28px; }
+    .hidden { display: none; }
+    .user-badge { display: flex; align-items: center; gap: 15px; background: #f3f4f6; padding: 6px 20px; border-radius: 60px; }
 
-    /* Search Bar */
-    .search-bar {
-      margin-bottom: 20px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .search-bar input {
-      flex: 1;
+    @media (max-width: 768px) {
+      .navbar { flex-direction: column; gap: 12px; border-radius: 30px; }
+      .stat-value { font-size: 32px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Animated Marquee Section -->
-    <div class="marquee-container">
-      <marquee behavior="scroll" direction="left" scrollamount="5">
-        🏫 Welcome to SmartSchool LMS - Complete Learning Management System! 📚 | 
-        👑 Admin: Manage all teachers and students! | 
-        👨‍🏫 Teachers: Create quizzes and track progress! | 
-        👨‍🎓 Students: Take quizzes and improve scores! | 
-        🌟 Together we build better education in Rwanda! 🇷🇼
-      </marquee>
-    </div>
+<div class="container">
+  <!-- Marquee -->
+  <div class="glass-card" style="padding: 12px 20px; margin-bottom: 20px;">
+    <marquee behavior="scroll" direction="left" scrollamount="4" style="color: #667eea; font-weight: 600;">
+      🚀 SmartSchool Pro | Bloom's Taxonomy LMS | Remember 🔵 | Understand 🟢 | Apply 🟡 | Analyze 🟠 | Evaluate 🔴 | Create 🟣 | Empowering Rwandan Education 🇷🇼
+    </marquee>
+  </div>
 
-    <!-- Navigation -->
-    <div class="navbar" id="navbar" style="display: none;">
-      <div class="logo">🏫 SmartSchool LMS</div>
-      <div class="nav-links" id="nav-links"></div>
-      <div class="user-badge">
-        <span id="user-name">User</span>
-        <span class="user-role" id="user-role">Student</span>
-        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
-      </div>
-    </div>
-
-    <!-- Auth Section -->
-    <div id="auth-section" class="card" style="max-width: 500px; margin: 100px auto;">
-      <div class="card-header">
-        <h2 class="card-title">🎓 Welcome to SmartSchool LMS</h2>
-      </div>
-      <marquee behavior="scroll" direction="right" scrollamount="3" style="margin-bottom: 20px; color: #14b8a6; font-size: 12px;">
-        ⭐ Login to start your learning journey! ⭐
-      </marquee>
-      <div id="auth-error" class="alert alert-error hidden"></div>
-      <div id="login-form">
-        <div class="form-group">
-          <label>📧 Email</label>
-          <input type="email" id="login-email" placeholder="admin@school.com">
-        </div>
-        <div class="form-group">
-          <label>🔒 Password</label>
-          <input type="password" id="login-password" placeholder="••••••">
-        </div>
-        <div class="form-group">
-          <label>👥 Role</label>
-          <select id="login-role">
-            <option value="admin">👑 Admin</option>
-            <option value="teacher">👨‍🏫 Teacher</option>
-            <option value="student">👨‍🎓 Student</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" style="width: 100%;" onclick="login()">🚀 Login</button>
-        <p style="text-align: center; margin-top: 16px;">
-          <a href="#" onclick="showRegister()">✨ Don't have an account? Register here ✨</a>
-        </p>
-      </div>
-      <div id="register-form" class="hidden">
-        <div class="form-group">
-          <label>👤 Full Name</label>
-          <input type="text" id="reg-name" placeholder="Enter your full name">
-        </div>
-        <div class="form-group">
-          <label>📧 Email</label>
-          <input type="email" id="reg-email" placeholder="email@school.com">
-        </div>
-        <div class="form-group">
-          <label>🔒 Password</label>
-          <input type="password" id="reg-password" placeholder="••••••">
-        </div>
-        <div class="form-group">
-          <label>👥 Role</label>
-          <select id="reg-role">
-            <option value="teacher">👨‍🏫 Teacher</option>
-            <option value="student">👨‍🎓 Student</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>🏫 School Name</label>
-          <input type="text" id="reg-school" placeholder="Your school name">
-        </div>
-        <button class="btn btn-primary" style="width: 100%;" onclick="register()">📝 Register</button>
-        <p style="text-align: center; margin-top: 16px;">
-          <a href="#" onclick="showLogin()">🔙 Already have an account? Login here</a>
-        </p>
-      </div>
-    </div>
-
-    <!-- Admin Dashboard -->
-    <div id="admin-dashboard" class="hidden">
-      <div class="marquee-container">
-        <marquee behavior="scroll" direction="left" scrollamount="4">
-          👑 Welcome School Administrator! 👑 | You have full control over teachers and students! | Manage users, view analytics, and ensure smooth operation! 📊
-        </marquee>
-      </div>
-
-      <div class="dashboard-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="admin-total-teachers">0</div>
-          <div class="stat-label">👨‍🏫 Total Teachers</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="admin-total-students">0</div>
-          <div class="stat-label">👨‍🎓 Total Students</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="admin-total-quizzes">0</div>
-          <div class="stat-label">📋 Total Quizzes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="admin-total-results">0</div>
-          <div class="stat-label">📊 Quiz Attempts</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">👑 Admin Control Panel</h3>
-        </div>
-        
-        <div class="admin-tabs">
-          <button class="admin-tab active" onclick="switchAdminTab('teachers')">👨‍🏫 Manage Teachers</button>
-          <button class="admin-tab" onclick="switchAdminTab('students')">👨‍🎓 Manage Students</button>
-          <button class="admin-tab" onclick="switchAdminTab('quizzes')">📋 All Quizzes</button>
-          <button class="admin-tab" onclick="switchAdminTab('analytics')">📊 Analytics</button>
-        </div>
-
-        <!-- Teachers Tab -->
-        <div id="admin-teachers-tab">
-          <div class="search-bar">
-            <input type="text" id="search-teacher" placeholder="🔍 Search teachers..." onkeyup="filterTeachers()">
-            <button class="btn btn-primary" onclick="showAddTeacherModal()">➕ Add Teacher</button>
-          </div>
-          <div id="teachers-list"></div>
-        </div>
-
-        <!-- Students Tab -->
-        <div id="admin-students-tab" class="hidden">
-          <div class="search-bar">
-            <input type="text" id="search-student" placeholder="🔍 Search students..." onkeyup="filterStudents()">
-            <button class="btn btn-primary" onclick="showAddStudentModal()">➕ Add Student</button>
-          </div>
-          <div id="students-list"></div>
-        </div>
-
-        <!-- Quizzes Tab -->
-        <div id="admin-quizzes-tab" class="hidden">
-          <div id="all-quizzes-list"></div>
-        </div>
-
-        <!-- Analytics Tab -->
-        <div id="admin-analytics-tab" class="hidden">
-          <div class="dashboard-grid">
-            <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
-              <div class="stat-value" id="avg-score-all">0%</div>
-              <div class="stat-label">📊 Overall Average Score</div>
-            </div>
-            <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-              <div class="stat-value" id="top-performer">-</div>
-              <div class="stat-label">🏆 Top Performer</div>
-            </div>
-            <div class="stat-card" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-              <div class="stat-value" id="needs-improvement">-</div>
-              <div class="stat-label">📉 Needs Improvement</div>
-            </div>
-          </div>
-          <div id="performance-chart"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Teacher Dashboard -->
-    <div id="teacher-dashboard" class="hidden">
-      <div class="marquee-container">
-        <marquee behavior="scroll" direction="left" scrollamount="4">
-          👨‍🏫 Welcome Teacher! 👨‍🏫 | Create engaging quizzes for your students! | Track their progress and help them improve! 📚
-        </marquee>
-      </div>
-
-      <div class="dashboard-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="total-quizzes">0</div>
-          <div class="stat-label">📋 Total Quizzes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="total-questions">0</div>
-          <div class="stat-label">❓ Total Questions</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="total-students">0</div>
-          <div class="stat-label">👨‍🎓 Active Students</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="avg-score">0%</div>
-          <div class="stat-label">📊 Average Score</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">📝 Create New Quiz</h3>
-          <button class="btn btn-primary" onclick="toggleCreateQuiz()">➕ New Quiz</button>
-        </div>
-        <div id="create-quiz-form" class="hidden">
-          <div class="form-group">
-            <label>📌 Quiz Title</label>
-            <input type="text" id="quiz-title" placeholder="e.g., Mathematics Quiz - Week 1">
-          </div>
-          <div class="form-group">
-            <label>📚 Subject</label>
-            <select id="quiz-subject">
-              <option value="Mathematics">🧮 Mathematics</option>
-              <option value="English">📖 English</option>
-              <option value="Science">🔬 Science</option>
-              <option value="Kinyarwanda">🇷🇼 Kinyarwanda</option>
-              <option value="Social Studies">🌍 Social Studies</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>🎓 Grade/Class</label>
-            <select id="quiz-class">
-              <option>P4</option><option>P5</option><option>P6</option>
-              <option>S1</option><option>S2</option><option>S3</option>
-              <option>S4</option><option>S5</option><option>S6</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>⏱️ Time Limit (minutes)</label>
-            <input type="number" id="quiz-time" value="30">
-          </div>
-          <div id="questions-container">
-            <h4>❓ Questions</h4>
-            <div id="questions-list"></div>
-            <button class="btn btn-secondary" onclick="addQuestion()">➕ Add Question</button>
-          </div>
-          <button class="btn btn-primary" style="margin-top: 16px;" onclick="saveQuiz()">💾 Save Quiz</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">📋 Your Quizzes</h3>
-        </div>
-        <div id="teacher-quizzes-list"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">📊 Student Performance</h3>
-        </div>
-        <div id="student-performance"></div>
-      </div>
-    </div>
-
-    <!-- Student Dashboard -->
-    <div id="student-dashboard" class="hidden">
-      <div class="marquee-container">
-        <marquee behavior="scroll" direction="left" scrollamount="4">
-          👨‍🎓 Welcome Student! 👨‍🎓 | Take quizzes and test your knowledge! | Track your progress and improve your scores! 🚀
-        </marquee>
-      </div>
-
-      <div class="dashboard-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="student-quizzes-taken">0</div>
-          <div class="stat-label">📝 Quizzes Taken</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="student-avg-score">0%</div>
-          <div class="stat-label">📊 Average Score</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="student-best-score">0%</div>
-          <div class="stat-label">🏆 Best Score</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">📚 Available Quizzes</h3>
-        </div>
-        <div id="available-quizzes"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">🏆 My Quiz Results</h3>
-        </div>
-        <div id="student-results"></div>
-      </div>
-    </div>
-
-    <!-- Add User Modal -->
-    <div id="add-user-modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title" id="modal-title">Add User</h3>
-            <button class="btn btn-secondary" onclick="closeModal()">❌ Close</button>
-          </div>
-          <div class="form-group">
-            <label>👤 Full Name</label>
-            <input type="text" id="modal-user-name">
-          </div>
-          <div class="form-group">
-            <label>📧 Email</label>
-            <input type="email" id="modal-user-email">
-          </div>
-          <div class="form-group">
-            <label>🔒 Password</label>
-            <input type="password" id="modal-user-password">
-          </div>
-          <div class="form-group">
-            <label>🏫 School</label>
-            <input type="text" id="modal-user-school">
-          </div>
-          <button class="btn btn-primary" onclick="addUser()">➕ Add User</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quiz Modal -->
-    <div id="quiz-modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title" id="modal-quiz-title">Quiz Title</h3>
-            <button class="btn btn-secondary" onclick="closeQuizModal()">❌ Close</button>
-          </div>
-          <div id="quiz-content"></div>
-          <div class="timer" id="quiz-timer">⏱️ Time Left: --:--</div>
-          <div id="quiz-questions"></div>
-          <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="submitQuiz()">📤 Submit Quiz</button>
-        </div>
-      </div>
+  <!-- Navbar -->
+  <div class="navbar" id="navbar" style="display: none;">
+    <div class="logo">🎓 SmartSchool Pro</div>
+    <div id="nav-links"></div>
+    <div class="user-badge">
+      <div id="user-avatar" style="width:40px;height:40px;border-radius:50%;background:#667eea;display:flex;align-items:center;justify-content:center;color:white;">👤</div>
+      <span id="user-name">User</span>
+      <span id="user-role" class="bloom-badge bloom-l1"></span>
+      <button class="btn" style="background:#ef4444;color:white;padding:8px 20px;" onclick="logout()">Logout</button>
     </div>
   </div>
 
-  <!-- 🔐 IMPORTANT: Load config.js FIRST (contains Firebase keys - hidden from GitHub) -->
-  <script src="config.js"></script>
-  
-  <script>
-    // Initialize Firebase (config is loaded from config.js)
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+  <!-- Auth Section -->
+  <div id="auth-section" class="glass-card" style="max-width: 520px; margin: 60px auto; text-align: center;">
+    <h2 style="font-size:32px;margin-bottom:10px;">🎓 SmartSchool Pro</h2>
+    <p style="margin-bottom:20px;">Bloom's Taxonomy Learning Platform</p>
+    <div id="auth-error" style="background:#fee2e2;padding:12px;border-radius:20px;margin-bottom:16px;display:none;"></div>
+    <button class="google-btn" onclick="signInWithGoogle()"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continue with Google</button>
+    <div style="margin:20px 0;"><hr><span style="background:white;padding:0 12px;">OR</span></div>
+    <div id="login-form">
+      <input type="email" id="login-email" placeholder="📧 Email" style="margin-bottom:12px;"><br>
+      <input type="password" id="login-password" placeholder="🔒 Password" style="margin-bottom:12px;"><br>
+      <select id="login-role" style="margin-bottom:20px;"><option value="admin">👑 Admin</option><option value="teacher">👨‍🏫 Teacher</option><option value="student">👨‍🎓 Student</option></select>
+      <button class="btn btn-primary" style="width:100%" onclick="login()">Sign In</button>
+      <p style="margin-top:20px"><a href="#" onclick="showRegister()">✨ Create new account</a></p>
+    </div>
+    <div id="register-form" class="hidden">
+      <input type="text" id="reg-name" placeholder="Full Name" style="margin-bottom:12px;"><br>
+      <input type="email" id="reg-email" placeholder="Email" style="margin-bottom:12px;"><br>
+      <input type="password" id="reg-password" placeholder="Password" style="margin-bottom:12px;"><br>
+      <select id="reg-role" style="margin-bottom:12px;"><option value="teacher">Teacher</option><option value="student">Student</option></select>
+      <input type="text" id="reg-school" placeholder="School Name" style="margin-bottom:20px;"><br>
+      <button class="btn btn-primary" style="width:100%" onclick="register()">Register</button>
+      <p style="margin-top:20px"><a href="#" onclick="showLogin()">Back to Login</a></p>
+    </div>
+  </div>
 
-    let currentUser = null;
-    let currentUserRole = null;
-    let currentUserData = null;
-    let currentQuiz = null;
-    let quizAnswers = [];
-    let quizTimer = null;
-    let questions = [];
-    let allTeachers = [];
-    let allStudents = [];
+  <!-- Admin Dashboard -->
+  <div id="admin-dashboard" class="hidden">
+    <div class="dashboard-grid">
+      <div class="stat-card"><div class="stat-value" id="admin-total-teachers">0</div><div class="stat-label">👨‍🏫 Teachers</div></div>
+      <div class="stat-card"><div class="stat-value" id="admin-total-students">0</div><div class="stat-label">👨‍🎓 Students</div></div>
+      <div class="stat-card"><div class="stat-value" id="admin-total-quizzes">0</div><div class="stat-label">📚 Quizzes</div></div>
+      <div class="stat-card"><div class="stat-value" id="admin-total-results">0</div><div class="stat-label">📊 Attempts</div></div>
+    </div>
+    <div class="glass-card">
+      <div class="admin-tabs"><button class="admin-tab active" onclick="switchAdminTab('teachers')">👨‍🏫 Teachers</button><button class="admin-tab" onclick="switchAdminTab('students')">👨‍🎓 Students</button><button class="admin-tab" onclick="switchAdminTab('quizzes')">📋 Quizzes</button><button class="admin-tab" onclick="switchAdminTab('analytics')">📈 Analytics</button></div>
+      <div id="admin-teachers-tab"><div id="teachers-list"></div></div>
+      <div id="admin-students-tab" class="hidden"><div id="students-list"></div></div>
+      <div id="admin-quizzes-tab" class="hidden"><div id="all-quizzes-list"></div></div>
+      <div id="admin-analytics-tab" class="hidden"><canvas id="adminChart" style="max-height:300px;width:100%"></canvas><div id="analyticsInsights" class="glass-card" style="margin-top:20px"></div></div>
+    </div>
+  </div>
 
-    // Auth State Listener
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists) {
-          currentUserData = userDoc.data();
-          currentUserRole = currentUserData.role;
-          document.getElementById('user-name').textContent = currentUserData.name;
-          const roleSpan = document.getElementById('user-role');
-          roleSpan.textContent = currentUserRole === 'admin' ? '👑 Admin' : (currentUserRole === 'teacher' ? '👨‍🏫 Teacher' : '👨‍🎓 Student');
-          roleSpan.className = `user-role role-${currentUserRole}`;
-          document.getElementById('navbar').style.display = 'flex';
-          document.getElementById('auth-section').classList.add('hidden');
-          
-          if (currentUserRole === 'admin') {
-            loadAdminDashboard();
-          } else if (currentUserRole === 'teacher') {
-            loadTeacherDashboard();
-          } else {
-            loadStudentDashboard();
-          }
-        }
-      } else {
-        currentUser = null;
-        document.getElementById('navbar').style.display = 'none';
-        document.getElementById('auth-section').classList.remove('hidden');
-        document.getElementById('admin-dashboard').classList.add('hidden');
-        document.getElementById('teacher-dashboard').classList.add('hidden');
-        document.getElementById('student-dashboard').classList.add('hidden');
+  <!-- Teacher Dashboard with Bloom Creator -->
+  <div id="teacher-dashboard" class="hidden">
+    <div class="dashboard-grid">
+      <div class="stat-card"><div class="stat-value" id="total-quizzes">0</div><div class="stat-label">My Quizzes</div></div>
+      <div class="stat-card"><div class="stat-value" id="total-questions">0</div><div class="stat-label">Questions</div></div>
+      <div class="stat-card"><div class="stat-value" id="total-students">0</div><div class="stat-label">Students</div></div>
+      <div class="stat-card"><div class="stat-value" id="avg-score">0%</div><div class="stat-label">Avg Score</div></div>
+    </div>
+    <div class="glass-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3>✏️ Create Quiz with Bloom's Taxonomy</h3><button class="btn btn-primary" onclick="toggleCreateQuiz()">+ New Quiz</button></div>
+    <div id="create-quiz-form" class="hidden">
+      <input type="text" id="quiz-title" placeholder="Quiz Title" style="margin-bottom:12px;">
+      <select id="quiz-subject" style="margin-bottom:12px;"><option>Mathematics</option><option>English</option><option>Science</option><option>Kinyarwanda</option><option>Social Studies</option></select>
+      <select id="quiz-class" style="margin-bottom:12px;"><option>P4</option><option>P5</option><option>P6</option><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select>
+      <input type="number" id="quiz-time" value="30" placeholder="Time (minutes)" style="margin-bottom:12px;">
+      <div style="background:#f0fdf4;padding:16px;border-radius:20px;margin-bottom:16px;"><h4>📊 Bloom Level Distribution</h4><div id="bloom-dist-summary" style="font-size:14px;"></div></div>
+      <div id="questions-container"><div id="questions-list"></div><button class="btn btn-secondary" onclick="addQuestion()" style="background:#e5e7eb;">+ Add Question with Bloom Level</button></div>
+      <button class="btn btn-primary" style="margin-top:20px;" onclick="saveQuiz()">💾 Publish Quiz</button>
+    </div></div>
+    <div class="glass-card"><h3>📋 My Quizzes</h3><div id="teacher-quizzes-list"></div></div>
+    <div class="glass-card"><h3>📊 Student Bloom Performance</h3><div id="student-performance"></div></div>
+  </div>
+
+  <!-- Student Dashboard -->
+  <div id="student-dashboard" class="hidden">
+    <div class="dashboard-grid">
+      <div class="stat-card"><div class="stat-value" id="student-quizzes-taken">0</div><div class="stat-label">Quizzes Taken</div></div>
+      <div class="stat-card"><div class="stat-value" id="student-avg-score">0%</div><div class="stat-label">Avg Score</div></div>
+      <div class="stat-card"><div class="stat-value" id="student-best-score">0%</div><div class="stat-label">Best Score</div></div>
+    </div>
+    <div class="glass-card"><h3>📚 Available Quizzes</h3><div id="available-quizzes"></div></div>
+    <div class="glass-card"><h3>🏆 My Results & Bloom Mastery</h3><div id="student-results"></div></div>
+  </div>
+
+  <!-- Modals -->
+  <div id="add-user-modal" class="modal hidden"><div class="modal-content"><div class="glass-card"><h3 id="modal-title">Add User</h3><input id="modal-user-name" placeholder="Name" style="margin-bottom:12px;"><input id="modal-user-email" placeholder="Email" style="margin-bottom:12px;"><input type="password" id="modal-user-password" placeholder="Password" style="margin-bottom:12px;"><input id="modal-user-school" placeholder="School" style="margin-bottom:20px;"><button class="btn btn-primary" onclick="addUser()">Add</button><button class="btn btn-secondary" onclick="closeModal()">Cancel</button></div></div></div>
+  <div id="quiz-modal" class="modal hidden"><div class="modal-content"><div class="glass-card"><div style="display:flex;justify-content:space-between;"><h3 id="modal-quiz-title"></h3><button onclick="closeQuizModal()" style="background:none;border:none;font-size:24px;">✖️</button></div><div id="quiz-timer" class="timer"></div><div id="quiz-questions"></div><button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="submitQuiz()">✅ Submit Quiz</button></div></div></div>
+</div>
+
+<script src="config.js"></script>
+<script>
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth(), db = firebase.firestore(), provider = new firebase.auth.GoogleAuthProvider();
+  let currentUser, currentUserRole, currentUserData, currentQuiz = null, quizAnswers = [], quizTimer = null, questionsBank = [], chart = null;
+
+  auth.onAuthStateChanged(async (u) => {
+    if(u){
+      currentUser = u;
+      const doc = await db.collection('users').doc(u.uid).get();
+      if(doc.exists){
+        currentUserData = doc.data(); currentUserRole = currentUserData.role;
+        document.getElementById('user-name').innerText = currentUserData.name;
+        document.getElementById('user-role').innerHTML = currentUserRole==='admin'?'👑 Admin':(currentUserRole==='teacher'?'👨‍🏫 Teacher':'👨‍🎓 Student');
+        document.getElementById('navbar').style.display = 'flex';
+        document.getElementById('auth-section').classList.add('hidden');
+        if(currentUserRole === 'admin') loadAdminDashboard();
+        else if(currentUserRole === 'teacher') loadTeacherDashboard();
+        else loadStudentDashboard();
       }
+    } else {
+      document.getElementById('navbar').style.display = 'none';
+      document.getElementById('auth-section').classList.remove('hidden');
+      ['admin-dashboard','teacher-dashboard','student-dashboard'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    }
+  });
+
+  async function signInWithGoogle(){
+    try {
+      const result = await auth.signInWithPopup(provider);
+      const userDoc = await db.collection('users').doc(result.user.uid).get();
+      if(!userDoc.exists){
+        let role = prompt('Select role:\n1 - Teacher\n2 - Student\n3 - Admin (code: ADMIN2024)');
+        let userRole = 'student';
+        if(role === '1') userRole = 'teacher';
+        else if(role === '3' && prompt('Admin code:') === 'ADMIN2024') userRole = 'admin';
+        let school = prompt('School name:', 'Rwanda Smart School');
+        await db.collection('users').doc(result.user.uid).set({
+          name: result.user.displayName || result.user.email.split('@')[0],
+          email: result.user.email, role: userRole, school: school || 'SmartSchool', photoURL: result.user.photoURL, createdAt: new Date()
+        });
+      }
+    } catch(e){ alert(e.message); }
+  }
+
+  async function register(){ const n=document.getElementById('reg-name').value, e=document.getElementById('reg-email').value, p=document.getElementById('reg-password').value, r=document.getElementById('reg-role').value, s=document.getElementById('reg-school').value; if(!n||!e||!p||!s) return alert('All fields'); const cred=await auth.createUserWithEmailAndPassword(e,p); await db.collection('users').doc(cred.user.uid).set({name:n,email:e,role:r,school:s,createdAt:new Date()}); alert('Registered! Please login.'); showLogin(); }
+  async function login(){ const e=document.getElementById('login-email').value, p=document.getElementById('login-password').value, rl=document.getElementById('login-role').value; const cred=await auth.signInWithEmailAndPassword(e,p); const ud=await db.collection('users').doc(cred.user.uid).get(); if(ud.exists && ud.data().role !== rl){ await auth.signOut(); alert(`Wrong role. You are ${ud.data().role}`); } }
+  function logout(){ auth.signOut(); }
+  function showRegister(){ document.getElementById('login-form').classList.add('hidden'); document.getElementById('register-form').classList.remove('hidden'); }
+  function showLogin(){ document.getElementById('register-form').classList.add('hidden'); document.getElementById('login-form').classList.remove('hidden'); }
+  function closeModal(){ document.getElementById('add-user-modal').classList.add('hidden'); }
+  function closeQuizModal(){ if(quizTimer) clearInterval(quizTimer); document.getElementById('quiz-modal').classList.add('hidden'); }
+
+  // Admin
+  async function loadAdminDashboard(){
+    document.getElementById('admin-dashboard').classList.remove('hidden');
+    let teachers = await db.collection('users').where('role','==','teacher').get();
+    let students = await db.collection('users').where('role','==','student').get();
+    let quizzes = await db.collection('quizzes').get();
+    let results = await db.collection('quizResults').get();
+    document.getElementById('admin-total-teachers').innerText = teachers.size;
+    document.getElementById('admin-total-students').innerText = students.size;
+    document.getElementById('admin-total-quizzes').innerText = quizzes.size;
+    document.getElementById('admin-total-results').innerText = results.size;
+    window.allTeachers = teachers.docs.map(d=>({id:d.id,...d.data()}));
+    window.allStudents = students.docs.map(d=>({id:d.id,...d.data()}));
+    loadTeachersList(); loadStudentsList(); loadAllQuizzes(); loadAdminAnalytics();
+  }
+  async function loadTeachersList(){ let html=''; for(let t of window.allTeachers){ let qc=(await db.collection('quizzes').where('teacherId','==',t.id).get()).size; html+=`<div class="glass-card" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;"><div><strong>${t.name}</strong><br>${t.email}<br>📋 ${qc} quizzes</div><div><button class="btn btn-warning" onclick="resetPwd('${t.email}')">Reset</button> <button class="btn btn-danger" onclick="deleteUser('${t.id}')">Delete</button></div></div></div>`; } document.getElementById('teachers-list').innerHTML = html; }
+  async function loadStudentsList(){ let html=''; for(let s of window.allStudents){ let res=await db.collection('quizResults').where('studentId','==',s.id).get(); let avg=res.size?res.docs.reduce((a,b)=>a+b.data().score,0)/res.size:0; html+=`<div class="glass-card" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;"><div><strong>${s.name}</strong><br>${s.email}<br>📊 Avg: ${Math.round(avg)}%</div><div><button class="btn btn-warning" onclick="resetPwd('${s.email}')">Reset</button> <button class="btn btn-danger" onclick="deleteUser('${s.id}')">Delete</button></div></div></div>`; } document.getElementById('students-list').innerHTML = html; }
+  async function loadAllQuizzes(){ let snap=await db.collection('quizzes').get(); let html=''; snap.forEach(d=>{ let q=d.data(); html+=`<div class="glass-card" style="margin-bottom:12px;"><div><strong>${q.title}</strong><br>${q.subject} | ${q.className} | Bloom Avg: ${q.avgBloomLevel || 'N/A'}<br><button class="btn btn-danger" onclick="deleteQuiz('${d.id}')">Delete</button></div></div>`; }); document.getElementById('all-quizzes-list').innerHTML = html; }
+  async function loadAdminAnalytics(){ let results=await db.collection('quizResults').get(); let scores=results.docs.map(r=>r.data().score); let avg=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:0; if(chart) chart.destroy(); let ctx=document.getElementById('adminChart').getContext('2d'); chart=new Chart(ctx,{type:'doughnut',data:{labels:['Average Score','Remaining'],datasets:[{data:[avg,100-avg],backgroundColor:['#667eea','#e5e7eb']}]}}); document.getElementById('analyticsInsights').innerHTML=`<div class="stat-card" style="background:#667eea;"><div class="stat-value">${Math.round(avg)}%</div><div>Overall Platform Average</div></div>`; }
+  async function deleteQuiz(id){ if(confirm('Delete?')){ await db.collection('quizzes').doc(id).delete(); loadAllQuizzes(); } }
+  async function deleteUser(uid){ if(confirm('Delete?')){ await db.collection('users').doc(uid).delete(); loadAdminDashboard(); } }
+  async function resetPwd(email){ await auth.sendPasswordResetEmail(email); alert('Reset email sent'); }
+  function switchAdminTab(tab){ document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active')); ['admin-teachers-tab','admin-students-tab','admin-quizzes-tab','admin-analytics-tab'].forEach(id=>document.getElementById(id).classList.add('hidden')); if(tab==='teachers'){ document.querySelectorAll('.admin-tab')[0].classList.add('active'); document.getElementById('admin-teachers-tab').classList.remove('hidden'); } else if(tab==='students'){ document.querySelectorAll('.admin-tab')[1].classList.add('active'); document.getElementById('admin-students-tab').classList.remove('hidden'); } else if(tab==='quizzes'){ document.querySelectorAll('.admin-tab')[2].classList.add('active'); document.getElementById('admin-quizzes-tab').classList.remove('hidden'); } else{ document.querySelectorAll('.admin-tab')[3].classList.add('active'); document.getElementById('admin-analytics-tab').classList.remove('hidden'); loadAdminAnalytics(); } }
+  function showAddTeacherModal(){ window.pendingRole='teacher'; document.getElementById('modal-title').innerText='Add Teacher'; document.getElementById('add-user-modal').classList.remove('hidden'); }
+  function showAddStudentModal(){ window.pendingRole='student'; document.getElementById('modal-title').innerText='Add Student'; document.getElementById('add-user-modal').classList.remove('hidden'); }
+  async function addUser(){ let name=document.getElementById('modal-user-name').value, email=document.getElementById('modal-user-email').value, pwd=document.getElementById('modal-user-password').value, school=document.getElementById('modal-user-school').value; if(!name||!email||!pwd||!school) return alert('Fill all'); let cred=await auth.createUserWithEmailAndPassword(email,pwd); await db.collection('users').doc(cred.user.uid).set({name,email,role:window.pendingRole,school,createdAt:new Date()}); alert('Added'); closeModal(); loadAdminDashboard(); }
+
+  // Teacher Bloom Question Builder
+  function addQuestion(){ questionsBank.push({text:'',bloomLevel:1,options:['','','',''],correct:0,explanation:''}); renderQuestionsList(); }
+  function removeQuestion(idx){ questionsBank.splice(idx,1); renderQuestionsList(); }
+  function updateQT(i,val){ questionsBank[i].text=val; }
+  function updateBloom(i,val){ questionsBank[i].bloomLevel=parseInt(val); renderQuestionsList(); }
+  function updateOption(i,opt,val){ questionsBank[i].options[opt]=val; }
+  function updateCorrect(i,val){ questionsBank[i].correct=parseInt(val); }
+  function renderQuestionsList(){
+    let container=document.getElementById('questions-list'); container.innerHTML='';
+    questionsBank.forEach((q,i)=>{
+      let bloomColors=['','#3b82f6','#10b981','#f59e0b','#f97316','#ef4444','#8b5cf6'];
+      let bloomNames=['','REMEMBER','UNDERSTAND','APPLY','ANALYZE','EVALUATE','CREATE'];
+      container.innerHTML+=`<div class="glass-card" style="margin-bottom:16px;"><h4>Q${i+1} <span class="bloom-badge" style="background:${bloomColors[q.bloomLevel]}">${bloomNames[q.bloomLevel]} (${q.bloomLevel} pts)</span></h4>
+      <input placeholder="Question text" onchange="updateQT(${i},this.value)" value="${q.text.replace(/"/g,'&quot;')}" style="margin-bottom:8px;">
+      <select onchange="updateBloom(${i},this.value)" style="margin-bottom:8px;"><option value="1" ${q.bloomLevel==1?'selected':''}>🔵 Level 1: REMEMBER (1 pt)</option><option value="2" ${q.bloomLevel==2?'selected':''}>🟢 Level 2: UNDERSTAND (2 pts)</option><option value="3" ${q.bloomLevel==3?'selected':''}>🟡 Level 3: APPLY (3 pts)</option><option value="4" ${q.bloomLevel==4?'selected':''}>🟠 Level 4: ANALYZE (4 pts)</option><option value="5" ${q.bloomLevel==5?'selected':''}>🔴 Level 5: EVALUATE (5 pts)</option><option value="6" ${q.bloomLevel==6?'selected':''}>🟣 Level 6: CREATE (6 pts)</option></select>
+      ${['A','B','C','D'].map((l,opt)=>`<input placeholder="Option ${l}" onchange="updateOption(${i},${opt},this.value)" value="${q.options[opt]}" style="margin-bottom:5px;">`).join('')}
+      <select onchange="updateCorrect(${i},this.value)"><option value="0" ${q.correct==0?'selected':''}>Correct: A</option><option value="1" ${q.correct==1?'selected':''}>B</option><option value="2" ${q.correct==2?'selected':''}>C</option><option value="3" ${q.correct==3?'selected':''}>D</option></select>
+      <button class="btn btn-danger" style="margin-top:8px;" onclick="removeQuestion(${i})">Remove</button></div>`;
     });
+    updateBloomSummary();
+  }
+  function updateBloomSummary(){ let levels=[0,0,0,0,0,0,0]; questionsBank.forEach(q=>levels[q.bloomLevel]++); let html=''; for(let i=1;i<=6;i++){ let pct=questionsBank.length?Math.round(levels[i]/questionsBank.length*100):0; html+=`<span style="display:inline-block;margin:4px;padding:4px 12px;border-radius:20px;background:${['','#3b82f6','#10b981','#f59e0b','#f97316','#ef4444','#8b5cf6'][i]};color:white;">L${i}: ${levels[i]} (${pct}%)</span>`; } document.getElementById('bloom-dist-summary').innerHTML=html||'No questions yet'; }
+  function toggleCreateQuiz(){ document.getElementById('create-quiz-form').classList.toggle('hidden'); if(!document.getElementById('create-quiz-form').classList.contains('hidden')){ questionsBank=[]; renderQuestionsList(); } }
+  async function saveQuiz(){ let title=document.getElementById('quiz-title').value, subject=document.getElementById('quiz-subject').value, className=document.getElementById('quiz-class').value, timeLimit=parseInt(document.getElementById('quiz-time').value); if(!title||questionsBank.length===0) return alert('Title and at least one question'); let totalPoints=questionsBank.reduce((s,q)=>s+q.bloomLevel,0); let avgBloom=totalPoints/questionsBank.length; await db.collection('quizzes').add({title,subject,className,timeLimit,questions:questionsBank,teacherId:currentUser.uid,teacherName:currentUserData.name,school:currentUserData.school,createdAt:new Date(),totalPoints,avgBloomLevel:avgBloom}); alert('Quiz published!'); toggleCreateQuiz(); loadTeacherDashboard(); }
+  async function loadTeacherDashboard(){
+    document.getElementById('teacher-dashboard').classList.remove('hidden');
+    let quizzes=await db.collection('quizzes').where('teacherId','==',currentUser.uid).get();
+    let totalQ=0; quizzes.forEach(q=>totalQ+=q.data().questions.length);
+    document.getElementById('total-quizzes').innerText=quizzes.size;
+    document.getElementById('total-questions').innerText=totalQ;
+    let students=await db.collection('users').where('role','==','student').get();
+    document.getElementById('total-students').innerText=students.size;
+    let results=await db.collection('quizResults').get(); let sum=0,count=0; results.forEach(r=>{sum+=r.data().score; count++;});
+    document.getElementById('avg-score').innerText=count?Math.round(sum/count)+'%':'0%';
+    let qlist=''; for(let q of quizzes.docs){ qlist+=`<div class="glass-card" style="margin-bottom:12px;"><h4>${q.data().title}</h4><p>${q.data().subject} | Bloom Avg: ${q.data().avgBloomLevel?.toFixed(1)||'N/A'} | Questions: ${q.data().questions.length}</p></div>`; }
+    document.getElementById('teacher-quizzes-list').innerHTML=qlist;
+    let perf=''; for(let s of students.docs){ let sres=await db.collection('quizResults').where('studentId','==',s.id).get(); let avg=sres.size?sres.docs.reduce((a,b)=>a+b.data().score,0)/sres.size:0; perf+=`<div class="glass-card" style="margin-bottom:8px;"><strong>${s.data().name}</strong> - Avg: ${Math.round(avg)}% (${sres.size} quizzes)</div>`; }
+    document.getElementById('student-performance').innerHTML=perf;
+  }
 
-    // Auth Functions
-    async function register() {
-      const name = document.getElementById('reg-name').value;
-      const email = document.getElementById('reg-email').value;
-      const password = document.getElementById('reg-password').value;
-      const role = document.getElementById('reg-role').value;
-      const school = document.getElementById('reg-school').value;
+  // Student
+  async function loadStudentDashboard(){
+    document.getElementById('student-dashboard').classList.remove('hidden');
+    let results=await db.collection('quizResults').where('studentId','==',currentUser.uid).get();
+    let scores=results.docs.map(r=>r.data().score);
+    let avg=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:0;
+    let best=scores.length?Math.max(...scores):0;
+    document.getElementById('student-quizzes-taken').innerText=results.size;
+    document.getElementById('student-avg-score').innerText=Math.round(avg)+'%';
+    document.getElementById('student-best-score').innerText=Math.round(best)+'%';
+    let allQuizzes=await db.collection('quizzes').get();
+    let takenIds=new Set(results.docs.map(r=>r.data().quizId));
+    let available=allQuizzes.docs.filter(q=>!takenIds.has(q.id));
+    let availHtml=''; for(let q of available){ availHtml+=`<div class="glass-card" style="margin-bottom:12px;"><h4>${q.data().title}</h4><p>${q.data().subject} | ${q.data().className} | ${q.data().questions.length} Qs | Bloom Lvl Avg: ${q.data().avgBloomLevel?.toFixed(1)||'N/A'}</p><button class="btn btn-primary" onclick="startQuiz('${q.id}')">Start Quiz</button></div>`; }
+    document.getElementById('available-quizzes').innerHTML=availHtml;
+    let resHtml=''; for(let r of results.docs){ let quiz=await db.collection('quizzes').doc(r.data().quizId).get(); if(quiz.exists) resHtml+=`<div class="glass-card" style="margin-bottom:8px;"><strong>${quiz.data().title}</strong> - Score: <span style="font-size:24px;font-weight:bold;color:#667eea;">${r.data().score}%</span></div>`; }
+    document.getElementById('student-results').innerHTML=resHtml;
+  }
 
-      if (!name || !email || !password || !school) {
-        showError('⚠️ Please fill all fields');
-        return;
-      }
-
-      try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        await db.collection('users').doc(userCredential.user.uid).set({
-          name, email, role, school, createdAt: new Date()
-        });
-        showLogin();
-        alert('✅ Registration successful! Please login.');
-      } catch (error) {
-        showError(error.message);
-      }
-    }
-
-    async function login() {
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
-      const role = document.getElementById('login-role').value;
-
-      if (!email || !password) {
-        showError('Please enter email and password');
-        return;
-      }
-
-      try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        const userDoc = await db.collection('users').doc(userCredential.user.uid).get();
-        if (userDoc.exists && userDoc.data().role !== role) {
-          await auth.signOut();
-          showError(`⚠️ You are registered as ${userDoc.data().role}`);
-          return;
-        }
-      } catch (error) {
-        showError(error.message);
-      }
-    }
-
-    async function logout() {
-      await auth.signOut();
-    }
-
-    function showRegister() {
-      document.getElementById('login-form').classList.add('hidden');
-      document.getElementById('register-form').classList.remove('hidden');
-    }
-
-    function showLogin() {
-      document.getElementById('register-form').classList.add('hidden');
-      document.getElementById('login-form').classList.remove('hidden');
-    }
-
-    function showError(message) {
-      const errorDiv = document.getElementById('auth-error');
-      errorDiv.textContent = message;
-      errorDiv.classList.remove('hidden');
-      setTimeout(() => errorDiv.classList.add('hidden'), 3000);
-    }
-
-    // Admin Functions
-    async function loadAdminDashboard() {
-      document.getElementById('admin-dashboard').classList.remove('hidden');
-      document.getElementById('teacher-dashboard').classList.add('hidden');
-      document.getElementById('student-dashboard').classList.add('hidden');
-      
-      const teachers = await db.collection('users').where('role', '==', 'teacher').get();
-      const students = await db.collection('users').where('role', '==', 'student').get();
-      const quizzes = await db.collection('quizzes').get();
-      const results = await db.collection('quizResults').get();
-      
-      document.getElementById('admin-total-teachers').textContent = teachers.size;
-      document.getElementById('admin-total-students').textContent = students.size;
-      document.getElementById('admin-total-quizzes').textContent = quizzes.size;
-      document.getElementById('admin-total-results').textContent = results.size;
-      
-      allTeachers = [];
-      for (const teacher of teachers.docs) {
-        allTeachers.push({ id: teacher.id, ...teacher.data() });
-      }
-      allStudents = [];
-      for (const student of students.docs) {
-        allStudents.push({ id: student.id, ...student.data() });
-      }
-      
-      loadTeachersList();
-      loadStudentsList();
-      loadAllQuizzes();
-      loadAnalytics();
-    }
-
-    function switchAdminTab(tab) {
-      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('admin-teachers-tab').classList.add('hidden');
-      document.getElementById('admin-students-tab').classList.add('hidden');
-      document.getElementById('admin-quizzes-tab').classList.add('hidden');
-      document.getElementById('admin-analytics-tab').classList.add('hidden');
-      
-      if (tab === 'teachers') {
-        document.querySelectorAll('.admin-tab')[0].classList.add('active');
-        document.getElementById('admin-teachers-tab').classList.remove('hidden');
-        loadTeachersList();
-      } else if (tab === 'students') {
-        document.querySelectorAll('.admin-tab')[1].classList.add('active');
-        document.getElementById('admin-students-tab').classList.remove('hidden');
-        loadStudentsList();
-      } else if (tab === 'quizzes') {
-        document.querySelectorAll('.admin-tab')[2].classList.add('active');
-        document.getElementById('admin-quizzes-tab').classList.remove('hidden');
-        loadAllQuizzes();
-      } else if (tab === 'analytics') {
-        document.querySelectorAll('.admin-tab')[3].classList.add('active');
-        document.getElementById('admin-analytics-tab').classList.remove('hidden');
-        loadAnalytics();
-      }
-    }
-
-    async function loadTeachersList() {
-      const container = document.getElementById('teachers-list');
-      container.innerHTML = '';
-      for (const teacher of allTeachers) {
-        const teacherQuizzes = await db.collection('quizzes').where('teacherId', '==', teacher.id).get();
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <strong>👨‍🏫 ${teacher.name}</strong><br>
-              <small>📧 ${teacher.email} | 🏫 ${teacher.school}</small><br>
-              <small>📋 Quizzes Created: ${teacherQuizzes.size}</small>
-            </div>
-            <div>
-              <button class="btn btn-warning" onclick="resetUserPassword('${teacher.email}')">🔑 Reset Password</button>
-              <button class="btn btn-danger" onclick="deleteUser('${teacher.id}')">🗑️ Delete</button>
-            </div>
-          </div>
-        `;
-        container.appendChild(div);
-      }
-    }
-
-    async function loadStudentsList() {
-      const container = document.getElementById('students-list');
-      container.innerHTML = '';
-      for (const student of allStudents) {
-        const results = await db.collection('quizResults').where('studentId', '==', student.id).get();
-        const avgScore = results.size > 0 ? results.docs.reduce((sum, r) => sum + r.data().score, 0) / results.size : 0;
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <strong>👨‍🎓 ${student.name}</strong><br>
-              <small>📧 ${student.email} | 🏫 ${student.school}</small><br>
-              <small>📝 Quizzes Taken: ${results.size} | 📊 Avg Score: ${Math.round(avgScore)}%</small>
-            </div>
-            <div>
-              <button class="btn btn-warning" onclick="resetUserPassword('${student.email}')">🔑 Reset Password</button>
-              <button class="btn btn-danger" onclick="deleteUser('${student.id}')">🗑️ Delete</button>
-            </div>
-          </div>
-        `;
-        container.appendChild(div);
-      }
-    }
-
-    async function loadAllQuizzes() {
-      const quizzes = await db.collection('quizzes').get();
-      const container = document.getElementById('all-quizzes-list');
-      container.innerHTML = '';
-      for (const quiz of quizzes.docs) {
-        const teacher = await db.collection('users').doc(quiz.data().teacherId).get();
-        const results = await db.collection('quizResults').where('quizId', '==', quiz.id).get();
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <strong>📋 ${quiz.data().title}</strong><br>
-              <small>👨‍🏫 Teacher: ${teacher.exists ? teacher.data().name : 'Unknown'} | 📚 ${quiz.data().subject} | 🎓 ${quiz.data().className}</small><br>
-              <small>❓ Questions: ${quiz.data().questions.length} | 📝 Attempts: ${results.size}</small>
-            </div>
-            <div>
-              <button class="btn btn-danger" onclick="deleteQuiz('${quiz.id}')">🗑️ Delete Quiz</button>
-            </div>
-          </div>
-        `;
-        container.appendChild(div);
-      }
-    }
-
-    async function loadAnalytics() {
-      const results = await db.collection('quizResults').get();
-      let totalScore = 0;
-      let studentScores = {};
-      
-      for (const result of results.docs) {
-        totalScore += result.data().score;
-        const studentId = result.data().studentId;
-        if (!studentScores[studentId]) studentScores[studentId] = [];
-        studentScores[studentId].push(result.data().score);
-      }
-      
-      const avgAll = results.size > 0 ? Math.round(totalScore / results.size) : 0;
-      document.getElementById('avg-score-all').textContent = avgAll + '%';
-      
-      let topStudent = null;
-      let topAvg = 0;
-      let worstStudent = null;
-      let worstAvg = 100;
-      
-      for (const [studentId, scores] of Object.entries(studentScores)) {
-        const avg = scores.reduce((a,b) => a + b, 0) / scores.length;
-        const studentDoc = await db.collection('users').doc(studentId).get();
-        if (studentDoc.exists) {
-          if (avg > topAvg) {
-            topAvg = avg;
-            topStudent = studentDoc.data().name;
-          }
-          if (avg < worstAvg) {
-            worstAvg = avg;
-            worstStudent = studentDoc.data().name;
-          }
-        }
-      }
-      
-      document.getElementById('top-performer').textContent = topStudent ? `${topStudent} (${Math.round(topAvg)}%)` : '-';
-      document.getElementById('needs-improvement').textContent = worstStudent ? `${worstStudent} (${Math.round(worstAvg)}%)` : '-';
-    }
-
-    function showAddTeacherModal() {
-      document.getElementById('modal-title').textContent = 'Add New Teacher';
-      document.getElementById('modal-user-name').value = '';
-      document.getElementById('modal-user-email').value = '';
-      document.getElementById('modal-user-password').value = '';
-      document.getElementById('modal-user-school').value = currentUserData?.school || '';
-      document.getElementById('add-user-modal').classList.remove('hidden');
-      window.pendingRole = 'teacher';
-    }
-
-    function showAddStudentModal() {
-      document.getElementById('modal-title').textContent = 'Add New Student';
-      document.getElementById('modal-user-name').value = '';
-      document.getElementById('modal-user-email').value = '';
-      document.getElementById('modal-user-password').value = '';
-      document.getElementById('modal-user-school').value = currentUserData?.school || '';
-      document.getElementById('add-user-modal').classList.remove('hidden');
-      window.pendingRole = 'student';
-    }
-
-    async function addUser() {
-      const name = document.getElementById('modal-user-name').value;
-      const email = document.getElementById('modal-user-email').value;
-      const password = document.getElementById('modal-user-password').value;
-      const school = document.getElementById('modal-user-school').value;
-      const role = window.pendingRole;
-      
-      if (!name || !email || !password || !school) {
-        alert('Please fill all fields');
-        return;
-      }
-      
-      try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        await db.collection('users').doc(userCredential.user.uid).set({
-          name, email, role, school, createdAt: new Date()
-        });
-        alert(`✅ ${role} added successfully!`);
-        closeModal();
-        loadAdminDashboard();
-      } catch (error) {
-        alert('Error: ' + error.message);
-      }
-    }
-
-    async function resetUserPassword(email) {
-      try {
-        await auth.sendPasswordResetEmail(email);
-        alert(`✅ Password reset email sent to ${email}`);
-      } catch (error) {
-        alert('Error: ' + error.message);
-      }
-    }
-
-    async function deleteUser(userId) {
-      if (confirm('⚠️ Are you sure you want to delete this user? This action cannot be undone!')) {
-        await db.collection('users').doc(userId).delete();
-        alert('✅ User deleted successfully');
-        loadAdminDashboard();
-      }
-    }
-
-    async function deleteQuiz(quizId) {
-      if (confirm('⚠️ Are you sure you want to delete this quiz?')) {
-        await db.collection('quizzes').doc(quizId).delete();
-        alert('✅ Quiz deleted successfully');
-        loadAllQuizzes();
-      }
-    }
-
-    function closeModal() {
-      document.getElementById('add-user-modal').classList.add('hidden');
-    }
-
-    function filterTeachers() {
-      const search = document.getElementById('search-teacher').value.toLowerCase();
-      const filtered = allTeachers.filter(t => t.name.toLowerCase().includes(search) || t.email.toLowerCase().includes(search));
-      const container = document.getElementById('teachers-list');
-      container.innerHTML = '';
-      filtered.forEach(async teacher => {
-        const teacherQuizzes = await db.collection('quizzes').where('teacherId', '==', teacher.id).get();
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <strong>👨‍🏫 ${teacher.name}</strong><br>
-              <small>📧 ${teacher.email} | 🏫 ${teacher.school}</small><br>
-              <small>📋 Quizzes Created: ${teacherQuizzes.size}</small>
-            </div>
-            <div>
-              <button class="btn btn-warning" onclick="resetUserPassword('${teacher.email}')">🔑 Reset Password</button>
-              <button class="btn btn-danger" onclick="deleteUser('${teacher.id}')">🗑️ Delete</button>
-            </div>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function filterStudents() {
-      const search = document.getElementById('search-student').value.toLowerCase();
-      const filtered = allStudents.filter(s => s.name.toLowerCase().includes(search) || s.email.toLowerCase().includes(search));
-      const container = document.getElementById('students-list');
-      container.innerHTML = '';
-      filtered.forEach(async student => {
-        const results = await db.collection('quizResults').where('studentId', '==', student.id).get();
-        const avgScore = results.size > 0 ? results.docs.reduce((sum, r) => sum + r.data().score, 0) / results.size : 0;
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <strong>👨‍🎓 ${student.name}</strong><br>
-              <small>📧 ${student.email} | 🏫 ${student.school}</small><br>
-              <small>📝 Quizzes Taken: ${results.size} | 📊 Avg Score: ${Math.round(avgScore)}%</small>
-            </div>
-            <div>
-              <button class="btn btn-warning" onclick="resetUserPassword('${student.email}')">🔑 Reset Password</button>
-              <button class="btn btn-danger" onclick="deleteUser('${student.id}')">🗑️ Delete</button>
-            </div>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    // Teacher Functions
-    function addQuestion() {
-      questions.push({
-        text: '',
-        options: ['', '', '', ''],
-        correct: 0
-      });
-      renderQuestionsList();
-    }
-
-    function removeQuestion(index) {
-      questions.splice(index, 1);
-      renderQuestionsList();
-    }
-
-    function updateQuestionText(index, value) {
-      questions[index].text = value;
-    }
-
-    function updateOption(index, optIndex, value) {
-      questions[index].options[optIndex] = value;
-    }
-
-    function updateCorrect(index, value) {
-      questions[index].correct = parseInt(value);
-    }
-
-    function renderQuestionsList() {
-      const container = document.getElementById('questions-list');
-      container.innerHTML = '';
-      questions.forEach((q, idx) => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.style.marginBottom = '16px';
-        div.innerHTML = `
-          <h4>❓ Question ${idx + 1}</h4>
-          <div class="form-group">
-            <label>Question Text</label>
-            <input type="text" value="${q.text.replace(/"/g, '&quot;')}" onchange="updateQuestionText(${idx}, this.value)">
-          </div>
-          <div class="form-group">
-            <label>Option A</label>
-            <input type="text" value="${q.options[0]}" onchange="updateOption(${idx}, 0, this.value)">
-          </div>
-          <div class="form-group">
-            <label>Option B</label>
-            <input type="text" value="${q.options[1]}" onchange="updateOption(${idx}, 1, this.value)">
-          </div>
-          <div class="form-group">
-            <label>Option C</label>
-            <input type="text" value="${q.options[2]}" onchange="updateOption(${idx}, 2, this.value)">
-          </div>
-          <div class="form-group">
-            <label>Option D</label>
-            <input type="text" value="${q.options[3]}" onchange="updateOption(${idx}, 3, this.value)">
-          </div>
-          <div class="form-group">
-            <label>✅ Correct Answer (0-A, 1-B, 2-C, 3-D)</label>
-            <input type="number" min="0" max="3" value="${q.correct}" onchange="updateCorrect(${idx}, this.value)">
-          </div>
-          <button class="btn btn-danger" onclick="removeQuestion(${idx})">🗑️ Remove Question</button>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function toggleCreateQuiz() {
-      const form = document.getElementById('create-quiz-form');
-      form.classList.toggle('hidden');
-      if (!form.classList.contains('hidden')) {
-        questions = [];
-        renderQuestionsList();
-      }
-    }
-
-    async function saveQuiz() {
-      const title = document.getElementById('quiz-title').value;
-      const subject = document.getElementById('quiz-subject').value;
-      const className = document.getElementById('quiz-class').value;
-      const timeLimit = parseInt(document.getElementById('quiz-time').value);
-
-      if (!title || questions.length === 0) {
-        alert('⚠️ Please add title and at least one question');
-        return;
-      }
-
-      try {
-        await db.collection('quizzes').add({
-          title, subject, className, timeLimit,
-          questions: questions,
-          teacherId: currentUser.uid,
-          teacherName: currentUserData.name,
-          school: currentUserData.school,
-          createdAt: new Date()
-        });
-        alert('✅ Quiz saved successfully!');
-        toggleCreateQuiz();
-        loadTeacherDashboard();
-        document.getElementById('quiz-title').value = '';
-        questions = [];
-      } catch (error) {
-        alert('❌ Error saving quiz: ' + error.message);
-      }
-    }
-
-    async function loadTeacherDashboard() {
-      document.getElementById('teacher-dashboard').classList.remove('hidden');
-      document.getElementById('admin-dashboard').classList.add('hidden');
-      document.getElementById('student-dashboard').classList.add('hidden');
-      
-      const quizzes = await db.collection('quizzes').where('teacherId', '==', currentUser.uid).get();
-      const totalQuizzes = quizzes.size;
-      let totalQuestions = 0;
-      quizzes.forEach(q => totalQuestions += q.data().questions.length);
-      
-      const students = await db.collection('users').where('role', '==', 'student').get();
-      const results = await db.collection('quizResults').get();
-      let totalScore = 0;
-      let resultCount = 0;
-      results.forEach(r => {
-        totalScore += r.data().score;
-        resultCount++;
-      });
-      
-      document.getElementById('total-quizzes').textContent = totalQuizzes;
-      document.getElementById('total-questions').textContent = totalQuestions;
-      document.getElementById('total-students').textContent = students.size;
-      document.getElementById('avg-score').textContent = resultCount > 0 ? Math.round(totalScore / resultCount) + '%' : '0%';
-      
-      const quizzesList = document.getElementById('teacher-quizzes-list');
-      quizzesList.innerHTML = '';
-      quizzes.forEach(async (quiz) => {
-        const results = await db.collection('quizResults').where('quizId', '==', quiz.id).get();
-        const avgScore = results.size > 0 ? results.docs.reduce((sum, r) => sum + r.data().score, 0) / results.size : 0;
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <h4>📋 ${quiz.data().title}</h4>
-          <p>📚 Subject: ${quiz.data().subject} | 🎓 Class: ${quiz.data().className}</p>
-          <p>❓ Questions: ${quiz.data().questions.length} | 📝 Taken: ${results.size} times | 📊 Avg Score: ${Math.round(avgScore)}%</p>
-          <button class="btn btn-secondary" onclick="viewQuizResults('${quiz.id}')">👁️ View Results</button>
-        `;
-        quizzesList.appendChild(div);
-      });
-      
-      const performanceDiv = document.getElementById('student-performance');
-      performanceDiv.innerHTML = '';
-      const allStudents = await db.collection('users').where('role', '==', 'student').get();
-      for (const student of allStudents.docs) {
-        const studentResults = await db.collection('quizResults').where('studentId', '==', student.id).get();
-        const avg = studentResults.size > 0 ? studentResults.docs.reduce((sum, r) => sum + r.data().score, 0) / studentResults.size : 0;
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <strong>👨‍🎓 ${student.data().name}</strong><br>
-              <small>📧 ${student.data().email}</small>
-            </div>
-            <div>
-              <span style="font-size: 24px; font-weight: bold; color: #14b8a6;">${Math.round(avg)}%</span><br>
-              <small>📝 ${studentResults.size} quizzes taken</small>
-            </div>
-          </div>
-        `;
-        performanceDiv.appendChild(div);
-      }
-    }
-
-    async function viewQuizResults(quizId) {
-      const results = await db.collection('quizResults').where('quizId', '==', quizId).get();
-      let html = '<div class="card"><h4>📊 Quiz Results</h4><table class="data-table"><thead><tr><th>👨‍🎓 Student</th><th>📊 Score</th><th>📅 Date</th></tr></thead><tbody>';
-      for (const result of results.docs) {
-        const student = await db.collection('users').doc(result.data().studentId).get();
-        html += `<tr>
-          <td>${student.exists ? student.data().name : 'Unknown'}</td>
-          <td><strong>${result.data().score}%</strong></td>
-          <td>${result.data().completedAt?.toDate().toLocaleDateString() || 'N/A'}</td>
-        </tr>`;
-      }
-      html += '</tbody></table></div>';
-      const win = window.open();
-      win.document.write(html);
-    }
-
-    // Student Functions
-    async function loadStudentDashboard() {
-      document.getElementById('student-dashboard').classList.remove('hidden');
-      document.getElementById('admin-dashboard').classList.add('hidden');
-      document.getElementById('teacher-dashboard').classList.add('hidden');
-      
-      const results = await db.collection('quizResults').where('studentId', '==', currentUser.uid).get();
-      const scores = results.docs.map(r => r.data().score);
-      const avgScore = scores.length > 0 ? scores.reduce((a,b) => a + b, 0) / scores.length : 0;
-      const bestScore = scores.length > 0 ? Math.max(...scores) : 0;
-      
-      document.getElementById('student-quizzes-taken').textContent = results.size;
-      document.getElementById('student-avg-score').textContent = Math.round(avgScore) + '%';
-      document.getElementById('student-best-score').textContent = Math.round(bestScore) + '%';
-      
-      const quizzes = await db.collection('quizzes').get();
-      const takenQuizIds = new Set(results.docs.map(r => r.data().quizId));
-      const availableQuizzes = quizzes.docs.filter(q => !takenQuizIds.has(q.id));
-      
-      const quizzesDiv = document.getElementById('available-quizzes');
-      quizzesDiv.innerHTML = '';
-      for (const quiz of availableQuizzes) {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <h4>📋 ${quiz.data().title}</h4>
-          <p>📚 Subject: ${quiz.data().subject} | 🎓 Class: ${quiz.data().className}</p>
-          <p>❓ Questions: ${quiz.data().questions.length} | ⏱️ Time: ${quiz.data().timeLimit} min</p>
-          <button class="btn btn-primary" onclick="startQuiz('${quiz.id}')">🚀 Start Quiz</button>
-        `;
-        quizzesDiv.appendChild(div);
-      }
-      
-      const resultsDiv = document.getElementById('student-results');
-      resultsDiv.innerHTML = '';
-      for (const result of results.docs) {
-        const quiz = await db.collection('quizzes').doc(result.data().quizId).get();
-        if (quiz.exists) {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-              <div>
-                <strong>📋 ${quiz.data().title}</strong><br>
-                <small>📚 ${quiz.data().subject}</small>
-              </div>
-              <div>
-                <span style="font-size: 24px; font-weight: bold; color: ${result.data().score >= 60 ? '#22c55e' : '#ef4444'}">${result.data().score}%</span><br>
-                <small>📅 ${result.data().completedAt?.toDate().toLocaleDateString() || 'N/A'}</small>
-              </div>
-            </div>
-          `;
-          resultsDiv.appendChild(div);
-        }
-      }
-    }
-
-    async function startQuiz(quizId) {
-      const quizDoc = await db.collection('quizzes').doc(quizId).get();
-      currentQuiz = { id: quizDoc.id, ...quizDoc.data() };
-      quizAnswers = new Array(currentQuiz.questions.length).fill(-1);
-      
-      document.getElementById('modal-quiz-title').textContent = currentQuiz.title;
-      
-      const questionsDiv = document.getElementById('quiz-questions');
-      questionsDiv.innerHTML = '';
-      currentQuiz.questions.forEach((q, idx) => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.id = `question-${idx}`;
-        div.innerHTML = `
-          <h4>❓ Question ${idx + 1}: ${q.text}</h4>
-          <div id="options-${idx}">
-            ${q.options.map((opt, optIdx) => `
-              <div class="quiz-option" onclick="selectAnswer(${idx}, ${optIdx})">
-                <div class="quiz-option-letter">${String.fromCharCode(65 + optIdx)}</div>
-                <span>${opt}</span>
-              </div>
-            `).join('')}
-          </div>
-        `;
-        questionsDiv.appendChild(div);
-      });
-      
-      let timeLeft = currentQuiz.timeLimit * 60;
-      const timerDiv = document.getElementById('quiz-timer');
-      quizTimer = setInterval(() => {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        timerDiv.innerHTML = `⏱️ Time Left: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-        if (timeLeft <= 0) {
-          clearInterval(quizTimer);
-          submitQuiz();
-        }
-        timeLeft--;
-      }, 1000);
-      
-      document.getElementById('quiz-modal').classList.remove('hidden');
-    }
-    
-    function selectAnswer(questionIdx, optionIdx) {
-      quizAnswers[questionIdx] = optionIdx;
-      const optionsDiv = document.getElementById(`options-${questionIdx}`);
-      const options = optionsDiv.querySelectorAll('.quiz-option');
-      options.forEach((opt, idx) => {
-        opt.classList.remove('selected');
-        if (idx === optionIdx) opt.classList.add('selected');
-      });
-    }
-    
-    async function submitQuiz() {
-      clearInterval(quizTimer);
-      
-      let correctCount = 0;
-      currentQuiz.questions.forEach((q, idx) => {
-        if (quizAnswers[idx] === q.correct) correctCount++;
-      });
-      const score = Math.round((correctCount / currentQuiz.questions.length) * 100);
-      
-      await db.collection('quizResults').add({
-        quizId: currentQuiz.id,
-        quizTitle: currentQuiz.title,
-        studentId: currentUser.uid,
-        studentName: currentUserData.name,
-        school: currentUserData.school,
-        score: score,
-        correctAnswers: correctCount,
-        totalQuestions: currentQuiz.questions.length,
-        answers: quizAnswers,
-        completedAt: new Date()
-      });
-      
-      alert(`🎉 Quiz Completed! Your score: ${score}% (${correctCount}/${currentQuiz.questions.length}) 🎉`);
-      closeQuizModal();
-      loadStudentDashboard();
-    }
-    
-    function closeQuizModal() {
-      if (quizTimer) clearInterval(quizTimer);
-      document.getElementById('quiz-modal').classList.add('hidden');
-      currentQuiz = null;
-      quizAnswers = [];
-    }
-  </script>
+  async function startQuiz(quizId){
+    let doc=await db.collection('quizzes').doc(quizId).get();
+    currentQuiz={id:doc.id,...doc.data()};
+    quizAnswers=new Array(currentQuiz.questions.length).fill(-1);
+    document.getElementById('modal-quiz-title').innerText=currentQuiz.title;
+    let qDiv=document.getElementById('quiz-questions'); qDiv.innerHTML='';
+    currentQuiz.questions.forEach((q,idx)=>{
+      let bloomNames=['','REMEMBER','UNDERSTAND','APPLY','ANALYZE','EVALUATE','CREATE'];
+      let bloomColors=['','#3b82f6','#10b981','#f59e0b','#f97316','#ef4444','#8b5cf6'];
+      let optsHtml='';
+      q.options.forEach((opt,optIdx)=>{ optsHtml+=`<div class="quiz-option" onclick="selectAns(${idx},${optIdx})"><span class="quiz-option-letter" style="width:32px;height:32px;background:#e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;">${String.fromCharCode(65+optIdx)}</span><span>${opt}</span></div>`; });
+      qDiv.innerHTML+=`<div class="glass-card" style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;"><h4>Question ${idx+1}</h4><span class="bloom-badge" style="background:${bloomColors[q.bloomLevel]}">${bloomNames[q.bloomLevel]} (${q.bloomLevel} pts)</span></div><p style="margin:12px 0;">${q.text}</p><div id="opts-${idx}">${optsHtml}</div></div>`;
+    });
+    let time=currentQuiz.timeLimit*60;
+    let timerSpan=document.getElementById('quiz-timer');
+    if(quizTimer) clearInterval(quizTimer);
+    quizTimer=setInterval(()=>{ let m=Math.floor(time/60),s=time%60; timerSpan.innerText=`⏱️ ${m}:${s.toString().padStart(2,'0')}`; if(time<=0){ clearInterval(quizTimer); submitQuiz(); } time--; },1000);
+    document.getElementById('quiz-modal').classList.remove('hidden');
+  }
+  window.selectAns=(qIdx,optIdx)=>{ quizAnswers[qIdx]=optIdx; document.querySelectorAll(`#opts-${qIdx} .quiz-option`).forEach((el,i)=>{ if(i===optIdx) el.classList.add('selected'); else el.classList.remove('selected'); }); };
+  async function submitQuiz(){
+    if(quizTimer) clearInterval(quizTimer);
+    let correct=0;
+    currentQuiz.questions.forEach((q,i)=>{ if(quizAnswers[i]===q.correct) correct++; });
+    let score=Math.round((correct/currentQuiz.questions.length)*100);
+    await db.collection('quizResults').add({quizId:currentQuiz.id,quizTitle:currentQuiz.title,studentId:currentUser.uid,studentName:currentUserData.name,school:currentUserData.school,score:score,correctAnswers:correct,totalQuestions:currentQuiz.questions.length,completedAt:new Date()});
+    alert(`🎉 Score: ${score}% (${correct}/${currentQuiz.questions.length})`);
+    closeQuizModal();
+    loadStudentDashboard();
+  }
+</script>
 </body>
 </html>
