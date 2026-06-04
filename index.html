@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartSchool Pro | Complete LMS</title>
+  <title>SmartSchool Pro | Complete LMS with Working Matching</title>
   
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -20,6 +20,8 @@
     .btn-primary{background:#14b8a6;color:white;}
     .btn-danger{background:#ef4444;color:white;}
     .btn-secondary{background:#e2e8f0;color:#333;}
+    .btn-warning{background:#f59e0b;color:white;}
+    .btn-success{background:#22c55e;color:white;}
     input,select,textarea{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:12px;margin-bottom:12px;}
     .dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:24px;}
     .stat-card{background:linear-gradient(135deg,#14b8a6,#0d9488);border-radius:20px;padding:24px;color:white;text-align:center;}
@@ -29,9 +31,13 @@
     .type-selector{display:flex;gap:12px;margin:15px 0;}
     .type-card{flex:1;text-align:center;padding:12px;border:2px solid #e2e8f0;border-radius:16px;cursor:pointer;}
     .type-card.selected{border-color:#14b8a6;background:#f0fdfa;}
-    .matching-pair{display:flex;gap:10px;margin-bottom:10px;}
+    .matching-pair{display:flex;gap:10px;margin-bottom:10px;align-items:center;}
+    .matching-columns{display:flex;gap:30px;margin-bottom:20px;}
+    .matching-col-a{flex:1;background:#f8fafc;padding:15px;border-radius:12px;}
+    .matching-col-b{flex:1;background:#f8fafc;padding:15px;border-radius:12px;}
+    .matching-item{padding:10px;margin:8px 0;background:white;border-radius:8px;border:1px solid #e2e8f0;}
     .explanation-box{background:#f0fdf4;border-left:4px solid #22c55e;padding:12px;margin-top:12px;border-radius:10px;}
-    .timer{font-size:24px;font-weight:bold;text-align:center;color:#14b8a6;margin:16px 0;}
+    .timer{font-size:28px;font-weight:bold;text-align:center;color:#14b8a6;margin:16px 0;font-family:monospace;}
     .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
     .modal-content{max-width:700px;width:100%;max-height:85vh;overflow-y:auto;}
     .hidden{display:none;}
@@ -40,16 +46,18 @@
     .role-admin{background:#8b5cf6;}
     .role-teacher{background:#14b8a6;}
     .role-student{background:#f59e0b;}
+    .grade-input{width:80px;padding:5px;margin-right:10px;}
+    .matching-answer-input{width:100%;padding:12px;font-family:monospace;font-size:14px;}
+    .correct-match{color:#22c55e;font-weight:bold;}
+    .wrong-match{color:#ef4444;text-decoration:line-through;}
   </style>
 </head>
 <body>
 <div class="container">
-  <!-- Header -->
   <div class="card" style="background:linear-gradient(135deg,#14b8a6,#0d9488);color:white;text-align:center;">
-    <marquee>🏫 SmartSchool Pro | MCQ • Essay • Matching | Answer Explanations | Points per Question 🇷🇼</marquee>
+    <marquee>🏫 SmartSchool Pro | Working Matching Questions | Essay Grading | Auto-Submit Timer 🇷🇼</marquee>
   </div>
 
-  <!-- Navbar -->
   <div class="navbar" id="navbar" style="display:none;">
     <div class="logo">🏫 SmartSchool Pro</div>
     <div class="user-badge">
@@ -101,13 +109,13 @@
       <div style="display:flex;justify-content:space-between;margin-bottom:20px;"><h3>📝 Create Quiz</h3><button class="btn btn-primary" onclick="toggleCreateQuiz()">+ New Quiz</button></div>
       <div id="create-quiz-form" style="display:none;">
         <input type="text" id="quiz-title" placeholder="Quiz Title">
-        <input type="text" id="quiz-subject" placeholder="📚 Subject (type freely, e.g., Mathematics, Physics)">
-        <input type="text" id="quiz-class" placeholder="🎓 Class (type freely, e.g., S3A, P6B, Senior 4)">
+        <input type="text" id="quiz-subject" placeholder="📚 Subject (type freely)">
+        <input type="text" id="quiz-class" placeholder="🎓 Class (type freely)">
         <input type="number" id="quiz-time" placeholder="Time Limit (minutes)" value="30">
         <div id="questions-list"></div>
         <div class="type-selector">
           <div class="type-card" onclick="selectQuestionType('mcq')" id="type-mcq-card"><strong>✅ MCQ</strong><br>Multiple Choice</div>
-          <div class="type-card" onclick="selectQuestionType('essay')" id="type-essay-card"><strong>📝 Essay</strong><br>Open Answer</div>
+          <div class="type-card" onclick="selectQuestionType('essay')" id="type-essay-card"><strong>📝 Essay</strong><br>Teacher Graded</div>
           <div class="type-card" onclick="selectQuestionType('matching')" id="type-matching-card"><strong>🔗 Matching</strong><br>Pair Items</div>
         </div>
         <button class="btn btn-primary" style="width:100%" onclick="addSelectedQuestionType()">+ Add Question</button>
@@ -115,6 +123,7 @@
       </div>
     </div>
     <div class="card"><h3>📋 My Quizzes</h3><div id="teacher-quizzes-list"></div></div>
+    <div class="card"><h3>📝 Pending Essay Grading</h3><div id="pending-essays-list"></div></div>
   </div>
 
   <!-- Student Dashboard -->
@@ -132,6 +141,9 @@
 
   <!-- Results Modal -->
   <div id="results-modal" class="modal" style="display:none;"><div class="modal-content"><div class="card"><h3>📊 Results & Explanations</h3><div id="results-content"></div><button class="btn btn-secondary" onclick="closeResultsModal()">Close</button></div></div></div>
+
+  <!-- Grade Essay Modal -->
+  <div id="grade-modal" class="modal" style="display:none;"><div class="modal-content"><div class="card"><h3>📝 Grade Essay</h3><div id="grade-content"></div><button class="btn btn-primary" onclick="submitGrade()">Submit Grade</button><button class="btn btn-secondary" onclick="closeGradeModal()">Cancel</button></div></div></div>
 
   <!-- Add User Modal -->
   <div id="add-user-modal" class="modal" style="display:none;"><div class="modal-content"><div class="card"><h3 id="modal-title">Add User</h3><input id="modal-user-name" placeholder="Name"><input id="modal-user-email" placeholder="Email"><input type="password" id="modal-user-password" placeholder="Password"><input id="modal-user-school" placeholder="School"><button class="btn btn-primary" onclick="addUser()">Add</button><button class="btn btn-secondary" onclick="closeModal()">Cancel</button></div></div></div>
@@ -157,6 +169,7 @@ const db = firebase.firestore();
 let currentUser = null, currentUserRole = null, currentUserData = null;
 let currentQuiz = null, quizAnswers = [], quizTimer = null, questionsBank = [];
 let selectedTypeToAdd = 'mcq';
+let currentGradingResult = null;
 
 // ========== AUTH FUNCTIONS ==========
 function showError(msg) { let d = document.getElementById('auth-error'); d.innerHTML = msg; d.style.display = 'block'; setTimeout(() => d.style.display = 'none', 4000); }
@@ -196,7 +209,37 @@ function showRegister() { document.getElementById('login-form').style.display = 
 function showLogin() { document.getElementById('register-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; }
 function forgotPassword() { let e = prompt('Enter email:'); if(e) auth.sendPasswordResetEmail(e).then(() => alert('Reset email sent!')); }
 
-// ========== QUESTION BUILDER (with Type Selection, Points, Explanations) ==========
+// ========== MATCHING HELPER FUNCTIONS ==========
+function parseMatchingAnswer(answerStr, leftCount) {
+  let matches = {};
+  if(!answerStr) return matches;
+  let pairs = answerStr.split(',').map(p => p.trim().toLowerCase());
+  for(let pair of pairs) {
+    let parts = pair.split('=');
+    if(parts.length === 2) {
+      let num = parseInt(parts[0]);
+      let letter = parts[1].trim();
+      if(!isNaN(num) && num >= 1 && num <= leftCount && letter >= 'a' && letter <= 'z') {
+        matches[num-1] = letter;
+      }
+    }
+  }
+  return matches;
+}
+
+function calculateMatchingScore(studentMatches, correctMatches, leftItems, rightItems) {
+  let correct = 0;
+  for(let i = 0; i < leftItems.length; i++) {
+    let studentLetter = studentMatches[i];
+    let correctLetter = correctMatches[i];
+    if(studentLetter && studentLetter === correctLetter) {
+      correct++;
+    }
+  }
+  return correct;
+}
+
+// ========== QUESTION BUILDER ==========
 function selectQuestionType(type) {
   selectedTypeToAdd = type;
   document.getElementById('type-mcq-card').classList.remove('selected');
@@ -209,9 +252,9 @@ function addSelectedQuestionType() {
   if(selectedTypeToAdd === 'mcq') {
     questionsBank.push({ type: 'mcq', text: '', options: ['','','',''], correct: 0, points: 1, explanation: '' });
   } else if(selectedTypeToAdd === 'essay') {
-    questionsBank.push({ type: 'essay', text: '', sampleAnswer: '', points: 5, explanation: '' });
+    questionsBank.push({ type: 'essay', text: '', points: 5, explanation: '' });
   } else if(selectedTypeToAdd === 'matching') {
-    questionsBank.push({ type: 'matching', text: '', pairs: [{ left: '', right: '' }], points: 3, explanation: '' });
+    questionsBank.push({ type: 'matching', text: '', leftItems: [{id:1, text:''}], rightItems: [{id:'a', text:''}], correctMatches: {}, points: 3, explanation: '' });
   }
   renderQuestionsList();
 }
@@ -222,10 +265,24 @@ function updateOption(idx, opt, val) { questionsBank[idx].options[opt] = val; }
 function updateCorrect(idx, val) { questionsBank[idx].correct = parseInt(val); }
 function updatePoints(idx, val) { questionsBank[idx].points = parseInt(val); }
 function updateExplanation(idx, val) { questionsBank[idx].explanation = val; }
-function updateSampleAnswer(idx, val) { questionsBank[idx].sampleAnswer = val; }
-function updateMatchingPair(idx, pairIdx, field, val) { questionsBank[idx].pairs[pairIdx][field] = val; }
-function addMatchingPair(idx) { questionsBank[idx].pairs.push({ left: '', right: '' }); renderQuestionsList(); }
-function removeMatchingPair(idx, pairIdx) { questionsBank[idx].pairs.splice(pairIdx, 1); renderQuestionsList(); }
+function addMatchingLeft(idx) { 
+  let newId = questionsBank[idx].leftItems.length + 1;
+  questionsBank[idx].leftItems.push({id: newId, text: ''}); 
+  renderQuestionsList(); 
+}
+function addMatchingRight(idx) { 
+  let nextLetter = String.fromCharCode(97 + questionsBank[idx].rightItems.length);
+  questionsBank[idx].rightItems.push({id: nextLetter, text: ''}); 
+  renderQuestionsList(); 
+}
+function removeMatchingLeft(idx, leftIdx) { questionsBank[idx].leftItems.splice(leftIdx, 1); renderQuestionsList(); }
+function removeMatchingRight(idx, rightIdx) { questionsBank[idx].rightItems.splice(rightIdx, 1); renderQuestionsList(); }
+function updateMatchingLeftText(idx, leftIdx, val) { questionsBank[idx].leftItems[leftIdx].text = val; }
+function updateMatchingRightText(idx, rightIdx, val) { questionsBank[idx].rightItems[rightIdx].text = val; }
+function updateMatchingCorrect(idx, leftIdx, val) {
+  if(!questionsBank[idx].correctMatches) questionsBank[idx].correctMatches = {};
+  questionsBank[idx].correctMatches[leftIdx] = val;
+}
 
 function renderQuestionsList() {
   let container = document.getElementById('questions-list');
@@ -236,37 +293,48 @@ function renderQuestionsList() {
     let html = `<div class="card" style="margin-bottom:16px;"><h4>Question ${idx+1} - ${typeBadge}</h4>`;
     html += `<input type="text" id="qt_${idx}" placeholder="Question text" value="${(q.text||'').replace(/"/g,'&quot;')}">`;
     html += `<input type="number" id="pts_${idx}" placeholder="Points / Marks" value="${q.points||1}">`;
+    
     if(q.type === 'mcq') {
       html += `<input type="text" id="opt_${idx}_0" placeholder="Option A" value="${q.options[0]||''}">`;
       html += `<input type="text" id="opt_${idx}_1" placeholder="Option B" value="${q.options[1]||''}">`;
       html += `<input type="text" id="opt_${idx}_2" placeholder="Option C" value="${q.options[2]||''}">`;
       html += `<input type="text" id="opt_${idx}_3" placeholder="Option D" value="${q.options[3]||''}">`;
-      html += `<input type="number" id="cor_${idx}" placeholder="Correct (0-A,1-B,2-C,3-D)" value="${q.correct}" min="0" max="3">`;
+      html += `<select id="cor_${idx}"><option value="0" ${q.correct==0?'selected':''}>Correct: A</option><option value="1" ${q.correct==1?'selected':''}>Correct: B</option><option value="2" ${q.correct==2?'selected':''}>Correct: C</option><option value="3" ${q.correct==3?'selected':''}>Correct: D</option></select>`;
     } else if(q.type === 'essay') {
-      html += `<textarea id="sans_${idx}" rows="3" placeholder="Sample correct answer">${q.sampleAnswer||''}</textarea>`;
+      html += `<p style="color:#666; font-size:12px;">📝 Essay question - Teacher will grade manually</p>`;
     } else if(q.type === 'matching') {
-      html += `<div id="matching-${idx}">`;
-      q.pairs.forEach((pair, pi) => {
-        html += `<div class="matching-pair"><input id="match_left_${idx}_${pi}" placeholder="Left item" value="${pair.left}" style="flex:1"><input id="match_right_${idx}_${pi}" placeholder="Right item" value="${pair.right}" style="flex:1"><button class="btn btn-danger" style="padding:4px 10px;" onclick="removeMatchingPair(${idx}, ${pi})">✖️</button></div>`;
+      html += `<div style="margin-bottom:10px;"><strong>Column A (Numbers 1, 2, 3...):</strong>`;
+      q.leftItems.forEach((item, li) => {
+        html += `<div class="matching-pair"><input placeholder="Item ${item.id}" value="${item.text}" id="left_${idx}_${li}" style="flex:2"><select id="correct_${idx}_${li}" style="width:100px; margin-left:10px;"><option value="">Match with...</option>`;
+        q.rightItems.forEach((right, ri) => {
+          let selected = (q.correctMatches && q.correctMatches[li] === right.id) ? 'selected' : '';
+          html += `<option value="${right.id}" ${selected}>${right.id}. ${right.text.substring(0,30)}</option>`;
+        });
+        html += `</select><button class="btn btn-danger" style="padding:4px 10px;" onclick="removeMatchingLeft(${idx}, ${li})">✖️</button></div>`;
       });
-      html += `<button class="btn btn-secondary" onclick="addMatchingPair(${idx})">+ Add Pair</button></div>`;
+      html += `<button class="btn btn-secondary" style="margin-top:5px;" onclick="addMatchingLeft(${idx})">+ Add to Column A</button></div>`;
+      html += `<div><strong>Column B (Letters a, b, c...):</strong>`;
+      q.rightItems.forEach((item, ri) => {
+        html += `<div class="matching-pair"><input placeholder="Item ${item.id}" value="${item.text}" id="right_${idx}_${ri}" style="flex:1"><button class="btn btn-danger" style="padding:4px 10px;" onclick="removeMatchingRight(${idx}, ${ri})">✖️</button></div>`;
+      });
+      html += `<button class="btn btn-secondary" style="margin-top:5px;" onclick="addMatchingRight(${idx})">+ Add to Column B</button></div>`;
     }
     html += `<textarea id="exp_${idx}" rows="2" placeholder="Explanation (shown to students after quiz)">${q.explanation||''}</textarea>`;
     html += `<button class="btn btn-danger" onclick="removeQuestion(${idx})">Remove Question</button></div>`;
     container.innerHTML += html;
     
-    // Attach event listeners
     document.getElementById(`qt_${idx}`).onchange = (e) => updateQuestionText(idx, e.target.value);
     document.getElementById(`pts_${idx}`).onchange = (e) => updatePoints(idx, e.target.value);
     if(q.type === 'mcq') {
       for(let i=0;i<4;i++) document.getElementById(`opt_${idx}_${i}`).onchange = (e) => updateOption(idx, i, e.target.value);
       document.getElementById(`cor_${idx}`).onchange = (e) => updateCorrect(idx, e.target.value);
-    } else if(q.type === 'essay') {
-      document.getElementById(`sans_${idx}`).onchange = (e) => updateSampleAnswer(idx, e.target.value);
     } else if(q.type === 'matching') {
-      for(let i=0;i<q.pairs.length;i++) {
-        document.getElementById(`match_left_${idx}_${i}`).onchange = (e) => updateMatchingPair(idx, i, 'left', e.target.value);
-        document.getElementById(`match_right_${idx}_${i}`).onchange = (e) => updateMatchingPair(idx, i, 'right', e.target.value);
+      for(let li=0; li<q.leftItems.length; li++) {
+        document.getElementById(`left_${idx}_${li}`).onchange = (e) => updateMatchingLeftText(idx, li, e.target.value);
+        document.getElementById(`correct_${idx}_${li}`).onchange = (e) => updateMatchingCorrect(idx, li, e.target.value);
+      }
+      for(let ri=0; ri<q.rightItems.length; ri++) {
+        document.getElementById(`right_${idx}_${ri}`).onchange = (e) => updateMatchingRightText(idx, ri, e.target.value);
       }
     }
     document.getElementById(`exp_${idx}`).onchange = (e) => updateExplanation(idx, e.target.value);
@@ -308,6 +376,94 @@ async function saveQuiz() {
   loadTeacherDashboard();
 }
 
+async function deleteQuiz(quizId) {
+  if(confirm('⚠️ Delete this quiz permanently?')) {
+    await db.collection('quizzes').doc(quizId).delete();
+    loadTeacherDashboard();
+    alert('✅ Quiz deleted');
+  }
+}
+
+// ========== ESSAY GRADING ==========
+async function loadPendingEssays() {
+  let results = await db.collection('quizResults').where('needsGrading', '==', true).get();
+  let html = '';
+  for(let r of results.docs) {
+    let quiz = await db.collection('quizzes').doc(r.data().quizId).get();
+    let student = await db.collection('users').doc(r.data().studentId).get();
+    if(quiz.exists && student.exists) {
+      html += `<div class="card"><strong>${quiz.data().title}</strong><br>Student: ${student.data().name}<br><button class="btn btn-warning" onclick="openGradeModal('${r.id}', '${r.data().studentId}', '${r.data().quizId}')">Grade Essay</button></div>`;
+    }
+  }
+  document.getElementById('pending-essays-list').innerHTML = html || '<p>No pending essays to grade</p>';
+}
+
+async function openGradeModal(resultId, studentId, quizId) {
+  let result = await db.collection('quizResults').doc(resultId).get();
+  let quiz = await db.collection('quizzes').doc(quizId).get();
+  let student = await db.collection('users').doc(studentId).get();
+  
+  let essayAnswers = result.data().answers;
+  let questions = quiz.data().questions;
+  
+  let html = `<p><strong>Student:</strong> ${student.data().name}</p><p><strong>Quiz:</strong> ${quiz.data().title}</p>`;
+  
+  for(let i=0; i<questions.length; i++) {
+    if(questions[i].type === 'essay') {
+      let currentGrade = (result.data().essayGrades && result.data().essayGrades[i]) || { points: 0, feedback: '' };
+      html += `<div class="card"><h4>Question: ${questions[i].text}</h4>
+      <p><strong>Student's Answer:</strong></p><p style="background:#f8fafc;padding:10px;border-radius:10px;">${essayAnswers[i] || 'No answer provided'}</p>
+      <p><strong>Points possible:</strong> ${questions[i].points}</p>
+      <input type="number" id="grade_${i}" placeholder="Points awarded" value="${currentGrade.points}" min="0" max="${questions[i].points}" style="width:100px; display:inline-block; margin-right:10px;">
+      <textarea id="feedback_${i}" placeholder="Feedback for student" rows="2">${currentGrade.feedback || ''}</textarea></div>`;
+    }
+  }
+  
+  currentGradingResult = { resultId, studentId, quizId, questions };
+  document.getElementById('grade-content').innerHTML = html;
+  document.getElementById('grade-modal').style.display = 'flex';
+}
+
+async function submitGrade() {
+  if(!currentGradingResult) return;
+  let essayGrades = {};
+  for(let i=0; i<currentGradingResult.questions.length; i++) {
+    if(currentGradingResult.questions[i].type === 'essay') {
+      let points = parseInt(document.getElementById(`grade_${i}`).value) || 0;
+      let feedback = document.getElementById(`feedback_${i}`).value;
+      essayGrades[i] = { points, feedback };
+    }
+  }
+  
+  let result = await db.collection('quizResults').doc(currentGradingResult.resultId).get();
+  let totalEarned = 0, totalPossible = 0;
+  for(let i=0; i<currentGradingResult.questions.length; i++) {
+    let q = currentGradingResult.questions[i];
+    totalPossible += q.points;
+    if(q.type === 'essay' && essayGrades[i]) {
+      totalEarned += essayGrades[i].points;
+    } else if(q.type !== 'essay' && result.data().earnedPoints) {
+      totalEarned += (result.data().earnedPoints || 0);
+    }
+  }
+  let newScore = Math.round((totalEarned / totalPossible) * 100);
+  
+  await db.collection('quizResults').doc(currentGradingResult.resultId).update({
+    essayGrades: essayGrades,
+    earnedPoints: totalEarned,
+    score: newScore,
+    needsGrading: false,
+    gradedAt: new Date()
+  });
+  
+  alert('✅ Essay graded successfully!');
+  closeGradeModal();
+  loadTeacherDashboard();
+  loadPendingEssays();
+}
+
+function closeGradeModal() { document.getElementById('grade-modal').style.display = 'none'; currentGradingResult = null; }
+
 // ========== AUTH STATE LISTENER ==========
 auth.onAuthStateChanged(async (user) => {
   if(user) {
@@ -323,8 +479,12 @@ auth.onAuthStateChanged(async (user) => {
       document.getElementById('navbar').style.display = 'flex';
       document.getElementById('auth-section').style.display = 'none';
       if(currentUserRole === 'admin') loadAdminDashboard();
-      else if(currentUserRole === 'teacher') loadTeacherDashboard();
+      else if(currentUserRole === 'teacher') { loadTeacherDashboard(); loadPendingEssays(); }
       else loadStudentDashboard();
+      
+      if(currentUserRole === 'student') {
+        db.collection('quizzes').onSnapshot(() => { loadStudentDashboard(); });
+      }
     }
   } else {
     document.getElementById('navbar').style.display = 'none';
@@ -369,7 +529,7 @@ async function loadTeacherDashboard() {
   for(let q of quizzes.docs) {
     let results = await db.collection('quizResults').where('quizId','==',q.id).get();
     let avg = results.size ? results.docs.reduce((a,b)=>a+b.data().score,0)/results.size : 0;
-    html += `<div class="card"><strong>${q.data().title}</strong><br>Subject: ${q.data().subject} | Class: ${q.data().className}<br>Avg: ${Math.round(avg)}% (${results.size} attempts)</div>`;
+    html += `<div class="card"><strong>${q.data().title}</strong><br>Subject: ${q.data().subject} | Class: ${q.data().className}<br>Avg: ${Math.round(avg)}% (${results.size} attempts)<br><button class="btn btn-danger" style="margin-top:10px;" onclick="deleteQuiz('${q.id}')">🗑️ Delete Quiz</button></div>`;
   }
   document.getElementById('teacher-quizzes-list').innerHTML = html || '<p>No quizzes yet</p>';
 }
@@ -396,7 +556,12 @@ async function loadStudentDashboard() {
   for(let r of results.docs) {
     let quiz = await db.collection('quizzes').doc(r.data().quizId).get();
     if(quiz.exists) {
-      resultsHtml += `<div class="card"><div style="display:flex;justify-content:space-between;"><div><strong>${quiz.data().title}</strong><br>Score: <span style="font-size:24px;font-weight:bold;color:${r.data().score>=60?'#22c55e':'#ef4444'}">${r.data().score}%</span></div><button class="btn btn-secondary" onclick="showResultDetails('${quiz.id}', '${r.id}')">View Answers</button></div></div>`;
+      let gradeStatus = r.data().needsGrading ? ' (Pending Teacher Grading)' : '';
+      resultsHtml += `<div class="card"><div style="display:flex;justify-content:space-between;"><div><strong>${quiz.data().title}</strong><br>Score: <span style="font-size:24px;font-weight:bold;color:${r.data().score>=60?'#22c55e':'#ef4444'}">${r.data().score}%</span>${gradeStatus}</div><button class="btn btn-secondary" onclick="showResultDetails('${quiz.id}', '${r.id}')">View Answers</button></div>`;
+      if(r.data().essayGrades) {
+        resultsHtml += `<div style="margin-top:10px; font-size:12px; color:#666;">📝 Essays graded by teacher</div>`;
+      }
+      resultsHtml += `</div>`;
     }
   }
   document.getElementById('student-results').innerHTML = resultsHtml || '<p>No quizzes taken yet</p>';
@@ -404,7 +569,9 @@ async function loadStudentDashboard() {
 
 async function showResultDetails(quizId, resultId) {
   let quizDoc = await db.collection('quizzes').doc(quizId).get();
+  let resultDoc = await db.collection('quizResults').doc(resultId).get();
   let quiz = quizDoc.data();
+  let result = resultDoc.data();
   let html = '';
   for(let i=0; i<quiz.questions.length; i++) {
     let q = quiz.questions[i];
@@ -413,9 +580,21 @@ async function showResultDetails(quizId, resultId) {
       let correctLetter = String.fromCharCode(65 + q.correct);
       correctDisplay = `<div class="explanation-box"><strong>✅ Correct Answer:</strong> ${correctLetter}. ${q.options[q.correct]}</div>`;
     } else if(q.type === 'essay') {
-      correctDisplay = `<div class="explanation-box"><strong>📝 Sample Answer:</strong><br>${q.sampleAnswer || 'No sample provided'}</div>`;
+      let grade = (result.essayGrades && result.essayGrades[i]) || { points: 0, feedback: 'Not graded yet' };
+      correctDisplay = `<div class="explanation-box"><strong>📝 Teacher's Grade:</strong> ${grade.points}/${q.points} points<br><strong>Feedback:</strong> ${grade.feedback}</div>`;
     } else if(q.type === 'matching') {
-      correctDisplay = `<div class="explanation-box"><strong>🔗 Correct Matching:</strong><br>${q.pairs.map(p => `• ${p.left} ⇔ ${p.right}`).join('<br>')}</div>`;
+      correctDisplay = `<div class="explanation-box"><strong>🔗 Correct Matching:</strong><br>`;
+      let studentAnswer = result.answers[i] || {};
+      for(let li=0; li<q.leftItems.length; li++) {
+        let correctLetter = q.correctMatches ? q.correctMatches[li] : '?';
+        let studentLetter = studentAnswer[li] || '?';
+        let matchClass = (studentLetter === correctLetter) ? 'correct-match' : 'wrong-match';
+        correctDisplay += `${q.leftItems[li].id}. ${q.leftItems[li].text} → ${correctLetter}. ${q.rightItems.find(r=>r.id===correctLetter)?.text || '?'}<br>`;
+        if(studentLetter !== '?' && studentLetter !== correctLetter) {
+          correctDisplay += `<span class="wrong-match">   Your answer: → ${studentLetter}. ${q.rightItems.find(r=>r.id===studentLetter)?.text || '?'}</span><br>`;
+        }
+      }
+      correctDisplay += `</div>`;
     }
     if(q.explanation) {
       correctDisplay += `<div class="explanation-box"><strong>💡 Explanation:</strong> ${q.explanation}</div>`;
@@ -431,10 +610,10 @@ function closeResultsModal() { document.getElementById('results-modal').style.di
 async function startQuiz(quizId) {
   let doc = await db.collection('quizzes').doc(quizId).get();
   currentQuiz = { id: doc.id, ...doc.data() };
-  quizAnswers = new Array(currentQuiz.questions.length).fill(-1);
+  quizAnswers = new Array(currentQuiz.questions.length).fill('');
   for(let i=0; i<currentQuiz.questions.length; i++) {
     if(currentQuiz.questions[i].type === 'essay') quizAnswers[i] = '';
-    else if(currentQuiz.questions[i].type === 'matching') quizAnswers[i] = [];
+    else if(currentQuiz.questions[i].type === 'matching') quizAnswers[i] = {};
   }
   document.getElementById('modal-quiz-title').innerText = currentQuiz.title;
   let qDiv = document.getElementById('quiz-questions');
@@ -444,20 +623,31 @@ async function startQuiz(quizId) {
     if(q.type === 'mcq') {
       content += `<div id="opts-${idx}">${q.options.map((opt, oi) => `<div class="quiz-option" onclick="selectAnswer(${idx}, ${oi})"><span>${String.fromCharCode(65+oi)}. ${opt}</span></div>`).join('')}</div>`;
     } else if(q.type === 'essay') {
-      content += `<textarea id="essay-${idx}" rows="4" style="width:100%;padding:12px;border-radius:12px;" placeholder="Write your answer..." onchange="selectEssayAnswer(${idx}, this.value)"></textarea>`;
+      content += `<textarea id="essay-${idx}" rows="5" style="width:100%;padding:12px;border-radius:12px;" placeholder="Write your answer here..." onchange="selectEssayAnswer(${idx}, this.value)"></textarea>`;
     } else if(q.type === 'matching') {
-      content += `<div id="matching-${idx}">${q.pairs.map((pair, pi) => `<div><span>${pair.left}</span> → <input placeholder="Match with..." onchange="selectMatchingAnswer(${idx}, ${pi}, this.value)"></div>`).join('')}</div>`;
+      content += `<div class="matching-columns"><div class="matching-col-a"><strong>Column A (Numbers)</strong>`;
+      q.leftItems.forEach(item => { content += `<div class="matching-item"><strong>${item.id}.</strong> ${item.text}</div>`; });
+      content += `</div><div class="matching-col-b"><strong>Column B (Letters)</strong>`;
+      q.rightItems.forEach(item => { content += `<div class="matching-item"><strong>${item.id}.</strong> ${item.text}</div>`; });
+      content += `</div></div>`;
+      content += `<input type="text" id="matching-${idx}" class="matching-answer-input" placeholder="Enter matches (example: 1=a, 2=b, 3=c)" onchange="selectMatchingAnswer(${idx}, this.value)">`;
+      content += `<p style="font-size:12px; color:#666; margin-top:5px;">📝 Format: number=letter (example: 1=a, 2=b, 3=c). Use commas to separate.</p>`;
     }
     content += `</div>`;
     qDiv.innerHTML += content;
   });
+  
   let timeLeft = currentQuiz.timeLimit * 60;
   let timerSpan = document.getElementById('quiz-timer');
   if(quizTimer) clearInterval(quizTimer);
   quizTimer = setInterval(() => {
     let m = Math.floor(timeLeft/60), s = timeLeft%60;
-    timerSpan.innerText = `⏱️ Time: ${m}:${s.toString().padStart(2,'0')}`;
-    if(timeLeft <= 0) { clearInterval(quizTimer); submitQuiz(); }
+    timerSpan.innerText = `⏱️ Time Left: ${m}:${s.toString().padStart(2,'0')}`;
+    if(timeLeft <= 0) { 
+      clearInterval(quizTimer); 
+      alert('⏰ Time is up! Submitting your quiz...');
+      submitQuiz(); 
+    }
     timeLeft--;
   }, 1000);
   document.getElementById('quiz-modal').style.display = 'flex';
@@ -474,56 +664,86 @@ window.selectAnswer = (qIdx, optIdx) => {
   }
 };
 window.selectEssayAnswer = (qIdx, val) => { quizAnswers[qIdx] = val; };
-window.selectMatchingAnswer = (qIdx, pairIdx, val) => { if(!quizAnswers[qIdx]) quizAnswers[qIdx] = []; quizAnswers[qIdx][pairIdx] = val; };
+window.selectMatchingAnswer = (qIdx, val) => { 
+  let matches = {};
+  let pairs = val.split(',').map(p => p.trim());
+  for(let pair of pairs) {
+    let [num, letter] = pair.split('=');
+    if(num && letter) {
+      let numInt = parseInt(num);
+      if(!isNaN(numInt)) {
+        matches[numInt-1] = letter.trim().toLowerCase();
+      }
+    }
+  }
+  quizAnswers[qIdx] = matches;
+};
 
 async function submitQuiz() {
   clearInterval(quizTimer);
   let totalPoints = 0, earnedPoints = 0;
-  currentQuiz.questions.forEach((q, idx) => {
+  let needsGrading = false;
+  
+  for(let idx=0; idx<currentQuiz.questions.length; idx++) {
+    let q = currentQuiz.questions[idx];
     let points = q.points || 1;
     totalPoints += points;
+    
     if(q.type === 'mcq') {
       if(quizAnswers[idx] === q.correct) earnedPoints += points;
     } else if(q.type === 'essay') {
-      if(quizAnswers[idx] && quizAnswers[idx].length > 15) earnedPoints += points * 0.7;
-      else if(quizAnswers[idx] && quizAnswers[idx].length > 0) earnedPoints += points * 0.3;
+      needsGrading = true;
     } else if(q.type === 'matching') {
-      let correct = 0;
-      if(quizAnswers[idx]) {
-        for(let i=0; i<q.pairs.length; i++) {
-          if(quizAnswers[idx][i] === q.pairs[i].right) correct++;
+      let correctMatches = q.correctMatches || {};
+      let studentMatches = quizAnswers[idx] || {};
+      let correctCount = 0;
+      for(let i=0; i<q.leftItems.length; i++) {
+        let correctLetter = correctMatches[i];
+        let studentLetter = studentMatches[i];
+        if(correctLetter && studentLetter && studentLetter === correctLetter) {
+          correctCount++;
         }
-        earnedPoints += (correct / q.pairs.length) * points;
       }
+      let earned = (correctCount / q.leftItems.length) * points;
+      earnedPoints += earned;
     }
-  });
+  }
+  
   let score = Math.round((earnedPoints / totalPoints) * 100);
   await db.collection('quizResults').add({
     quizId: currentQuiz.id, quizTitle: currentQuiz.title,
     studentId: currentUser.uid, studentName: currentUserData.name,
     score: score, earnedPoints: earnedPoints, totalPoints: totalPoints,
-    answers: quizAnswers, completedAt: new Date()
+    answers: quizAnswers, needsGrading: needsGrading,
+    completedAt: new Date()
   });
-  alert(`🎉 Score: ${score}% (${Math.round(earnedPoints)}/${totalPoints} points)`);
+  
+  alert(needsGrading ? `🎉 Quiz submitted! Score: ${score}% (${Math.round(earnedPoints)}/${totalPoints} points)\n📝 Essay questions will be graded by your teacher.` : `🎉 Quiz Complete! Score: ${score}% (${Math.round(earnedPoints)}/${totalPoints} points)`);
   document.getElementById('quiz-modal').style.display = 'none';
   loadStudentDashboard();
 }
 
 function closeQuizModal() { if(quizTimer) clearInterval(quizTimer); document.getElementById('quiz-modal').style.display = 'none'; }
 
-// Make all functions global for HTML onclick
+// Make functions global
 window.selectQuestionType = selectQuestionType;
 window.addSelectedQuestionType = addSelectedQuestionType;
 window.removeQuestion = removeQuestion;
-window.removeMatchingPair = removeMatchingPair;
-window.addMatchingPair = addMatchingPair;
+window.addMatchingLeft = addMatchingLeft;
+window.addMatchingRight = addMatchingRight;
+window.removeMatchingLeft = removeMatchingLeft;
+window.removeMatchingRight = removeMatchingRight;
 window.toggleCreateQuiz = toggleCreateQuiz;
 window.saveQuiz = saveQuiz;
+window.deleteQuiz = deleteQuiz;
 window.startQuiz = startQuiz;
 window.submitQuiz = submitQuiz;
 window.closeQuizModal = closeQuizModal;
 window.showResultDetails = showResultDetails;
 window.closeResultsModal = closeResultsModal;
+window.openGradeModal = openGradeModal;
+window.submitGrade = submitGrade;
+window.closeGradeModal = closeGradeModal;
 window.showAddTeacherModal = showAddTeacherModal;
 window.showAddStudentModal = showAddStudentModal;
 window.addUser = addUser;
