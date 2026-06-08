@@ -4,13 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="SmartSchool Pro - Complete Learning Management System with 6 Question Types, Leaderboard, Notifications, Live Chat, Schedule Quiz, Password Reset">
-  <meta name="keywords" content="LMS, Learning Management System, Online Quiz, Leaderboard, Notifications, Live Chat, Education, Rwanda">
-  <meta name="author" content="SmartSchool Pro">
   <meta name="theme-color" content="#14b8a6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SmartSchool Pro">
-  <title>SmartSchool Pro | Complete LMS - Leaderboard, Notifications, Live Chat</title>
+  <link rel="manifest" href="data:application/manifest+json,{
+    %22name%22:%22SmartSchool%20Pro%22,
+    %22short_name%22:%22SmartSchool%22,
+    %22start_url%22:%22.%22,
+    %22display%22:%22standalone%22,
+    %22background_color%22:%22%2314b8a6%22,
+    %22theme_color%22:%22%2314b8a6%22,
+    %22icons%22:[{
+      %22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E%22,
+      %22sizes%22:%22any%22,
+      %22type%22:%22image/svg+xml%22
+    }]
+  }">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
+  <title>SmartSchool Pro | Complete LMS</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -42,12 +54,6 @@
     .type-card{text-align:center;padding:12px;border:1px solid rgba(255,255,255,0.1);border-radius:16px;cursor:pointer;transition:all 0.2s;background:rgba(18,18,35,0.6);}
     .type-card:hover{transform:translateY(-2px);border-color:#14b8a6;}
     .type-card.selected{border-color:#14b8a6;background:rgba(20,184,166,0.15);}
-    .matching-pair{display:flex;gap:10px;margin-bottom:10px;align-items:center;}
-    .matching-columns{display:flex;gap:30px;margin-bottom:20px;flex-wrap:wrap;}
-    .matching-col-a{flex:1;background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;}
-    .matching-col-b{flex:1;background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;}
-    .matching-item{padding:10px;margin:8px 0;background:rgba(255,255,255,0.03);border-radius:8px;}
-    .explanation-box{background:rgba(34,197,94,0.1);border-left:4px solid #22c55e;padding:12px;margin-top:12px;border-radius:10px;}
     .timer{font-size:28px;font-weight:bold;text-align:center;color:#14b8a6;margin:16px 0;font-family:monospace;}
     .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
     .modal-content{max-width:700px;width:100%;max-height:85vh;overflow-y:auto;border-radius:20px;}
@@ -58,19 +64,15 @@
     .role-teacher{background:#14b8a6;}
     .role-student{background:#f59e0b;}
     .question-counter{background:#14b8a6;border-radius:30px;padding:4px 12px;font-size:12px;display:inline-block;}
-    .badge-mcq{background:#3b82f6;color:white;padding:4px 12px;border-radius:20px;font-size:11px;margin-left:10px;}
-    .badge-essay{background:#f59e0b;color:white;padding:4px 12px;border-radius:20px;font-size:11px;margin-left:10px;}
-    .badge-matching{background:#10b981;color:white;padding:4px 12px;border-radius:20px;font-size:11px;margin-left:10px;}
-    .badge-truefalse{background:#8b5cf6;color:white;padding:4px 12px;border-radius:20px;font-size:11px;margin-left:10px;}
-    .badge-fillblank{background:#ec489a;color:white;padding:4px 12px;border-radius:20px;font-size:11px;margin-left:10px;}
-    .badge-shortanswer{background:#14b8a6;color:white;padding:4px 12px;border-radius:20px;font-size:11px;margin-left:10px;}
-    .nav-buttons{display:flex;justify-content:space-between;gap:10px;margin-top:20px;}
     
-    /* Leaderboard Styles */
+    /* PWA Install Button */
+    .install-pwa-btn{background:#14b8a6;color:white;border:none;padding:8px 16px;border-radius:40px;cursor:pointer;font-size:13px;margin-left:15px;font-weight:bold;transition:all 0.2s;}
+    .install-pwa-btn:hover{background:#0d9488;transform:scale(1.02);}
+    
+    /* Leaderboard */
     .leaderboard-table{width:100%;border-collapse:collapse;}
     .leaderboard-table th,.leaderboard-table td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1);}
     .leaderboard-table th{color:#14b8a6;}
-    .leaderboard-table tr:hover{background:rgba(20,184,166,0.1);}
     .rank-1{background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,215,0,0.05));}
     .rank-2{background:linear-gradient(135deg,rgba(192,192,192,0.2),rgba(192,192,192,0.05));}
     .rank-3{background:linear-gradient(135deg,rgba(205,127,50,0.2),rgba(205,127,50,0.05));}
@@ -88,10 +90,6 @@
     .notification-time{font-size:10px;color:#94a3b8;}
     .mark-read-btn{text-align:center;padding:10px;color:#14b8a6;cursor:pointer;}
     
-    /* Toast Notification */
-    .toast{position:fixed;bottom:20px;right:20px;background:rgba(20,184,166,0.9);color:white;padding:12px 20px;border-radius:40px;z-index:2000;animation:slideIn 0.3s ease;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
-    @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
-    
     /* Chat Styles */
     .chat-container{height:300px;overflow-y:auto;padding:10px;background:rgba(0,0,0,0.2);border-radius:16px;margin-bottom:12px;}
     .chat-message{padding:10px;margin-bottom:10px;border-radius:12px;max-width:80%;}
@@ -101,17 +99,24 @@
     .chat-text{word-wrap:break-word;}
     .chat-time{font-size:9px;opacity:0.5;margin-top:4px;}
     
+    .nav-buttons{display:flex;justify-content:space-between;gap:10px;margin-top:20px;}
+    .toast{position:fixed;bottom:20px;right:20px;background:rgba(20,184,166,0.9);color:white;padding:12px 20px;border-radius:40px;z-index:2000;animation:slideIn 0.3s ease;}
+    @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+    
     @media (max-width:768px){.type-selector{grid-template-columns:repeat(2,1fr);}}
   </style>
 </head>
 <body>
 <div class="container">
   <div class="card" style="background:linear-gradient(135deg,#14b8a6,#0d9488);text-align:center;">
-    <marquee>🏫 SmartSchool Pro | 6 Question Types | Leaderboard | Notifications | Live Chat | Schedule Quiz | Password Reset | All Working! 🇷🇼</marquee>
+    <marquee>🏫 SmartSchool Pro | 6 Question Types | Leaderboard | Notifications | Live Chat | Schedule Quiz | Install App on Phone! 🇷🇼</marquee>
   </div>
 
   <div class="navbar" id="navbar" style="display:none;">
-    <div class="logo">🎓 SmartSchool Pro</div>
+    <div class="logo">
+      🎓 SmartSchool Pro
+      <button id="installPwaBtn" class="install-pwa-btn" style="display:none;">📱 Install App</button>
+    </div>
     <div class="user-badge">
       <div class="notification-bell" onclick="toggleNotifications()">
         🔔
@@ -191,12 +196,12 @@
         <input type="datetime-local" id="quiz-schedule">
         <div id="questions-list"></div>
         <div class="type-selector">
-          <div class="type-card" onclick="selectQuestionType('mcq')" id="type-mcq-card"><strong>✅ MCQ</strong><br>Multiple Choice</div>
-          <div class="type-card" onclick="selectQuestionType('truefalse')" id="type-truefalse-card"><strong>✓ True/False</strong><br>True or False</div>
-          <div class="type-card" onclick="selectQuestionType('fillblank')" id="type-fillblank-card"><strong>_ Fill Blank</strong><br>Fill in blank</div>
-          <div class="type-card" onclick="selectQuestionType('shortanswer')" id="type-shortanswer-card"><strong>📝 Short Answer</strong><br>Brief answer</div>
-          <div class="type-card" onclick="selectQuestionType('essay')" id="type-essay-card"><strong>📄 Essay</strong><br>Long answer</div>
-          <div class="type-card" onclick="selectQuestionType('matching')" id="type-matching-card"><strong>🔗 Matching</strong><br>Pair items</div>
+          <div class="type-card" onclick="selectQuestionType('mcq')" id="type-mcq-card"><strong>✅ MCQ</strong></div>
+          <div class="type-card" onclick="selectQuestionType('truefalse')" id="type-truefalse-card"><strong>✓ True/False</strong></div>
+          <div class="type-card" onclick="selectQuestionType('fillblank')" id="type-fillblank-card"><strong>_ Fill Blank</strong></div>
+          <div class="type-card" onclick="selectQuestionType('shortanswer')" id="type-shortanswer-card"><strong>📝 Short Answer</strong></div>
+          <div class="type-card" onclick="selectQuestionType('essay')" id="type-essay-card"><strong>📄 Essay</strong></div>
+          <div class="type-card" onclick="selectQuestionType('matching')" id="type-matching-card"><strong>🔗 Matching</strong></div>
         </div>
         <button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="addSelectedQuestionType()">+ Add Question</button>
         <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="saveQuiz()">📌 Publish Quiz</button>
@@ -222,23 +227,7 @@
   </div>
 
   <!-- Quiz Modal -->
-  <div id="quiz-modal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-          <h3 id="modal-quiz-title"></h3>
-          <div id="question-counter" class="question-counter">Question 1 of ?</div>
-        </div>
-        <div id="quiz-timer" class="timer"></div>
-        <div id="quiz-questions"></div>
-        <div class="nav-buttons">
-          <button class="btn btn-secondary" id="prev-question-btn" onclick="changeQuestion(-1)" style="display:none;">◀ Previous</button>
-          <button class="btn btn-primary" id="next-question-btn" style="flex:1;" onclick="changeQuestion(1)">Next ▶</button>
-        </div>
-        <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="submitQuiz()">📤 Submit Quiz</button>
-      </div>
-    </div>
-  </div>
+  <div id="quiz-modal" class="modal" style="display:none;"><div class="modal-content"><div class="card"><h3 id="modal-quiz-title"></h3><div id="quiz-timer" class="timer"></div><div id="quiz-questions"></div><div class="nav-buttons"><button class="btn btn-secondary" id="prev-question-btn" onclick="changeQuestion(-1)" style="display:none;">◀ Previous</button><button class="btn btn-primary" id="next-question-btn" style="flex:1;" onclick="changeQuestion(1)">Next ▶</button></div><button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="submitQuiz()">📤 Submit Quiz</button></div></div></div>
 
   <!-- Results Modal -->
   <div id="results-modal" class="modal" style="display:none;"><div class="modal-content"><div class="card"><h3>📊 Results & Explanations</h3><div id="results-content"></div><button class="btn btn-secondary" onclick="closeResultsModal()">Close</button></div></div></div>
@@ -265,13 +254,27 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ========== GLOBAL VARIABLES ==========
-let currentUser = null, currentUserRole = null, currentUserData = null;
-let currentQuiz = null, quizAnswers = [], quizTimer = null, questionsBank = [];
-let selectedTypeToAdd = 'mcq';
-let currentGradingResult = null;
-let currentQuestionIndex = 0;
-let totalQuestionsCount = 0;
+// ========== PWA INSTALL (WORKING) ==========
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  let installBtn = document.getElementById('installPwaBtn');
+  if(installBtn) {
+    installBtn.style.display = 'inline-block';
+    installBtn.onclick = () => {
+      installBtn.style.display = 'none';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    };
+  }
+});
+
+// Also check if already installed
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installPwaBtn').style.display = 'none';
+  deferredPrompt = null;
+});
 
 // ========== PASSWORD RESET ==========
 function showForgotPassword() {
@@ -473,6 +476,9 @@ function showRegister() { document.getElementById('login-form').style.display = 
 function showLogin() { document.getElementById('register-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; document.getElementById('forgot-form').style.display = 'none'; }
 
 // ========== QUESTION BUILDER ==========
+let questionsBank = [];
+let selectedTypeToAdd = 'mcq';
+
 function selectQuestionType(type) {
   selectedTypeToAdd = type;
   ['mcq','truefalse','fillblank','shortanswer','essay','matching'].forEach(t => {
@@ -499,12 +505,9 @@ function renderQuestionsList() {
   if(!container) return;
   container.innerHTML = '';
   questionsBank.forEach((q, idx) => {
-    let typeName = q.type === 'mcq' ? 'MCQ' : (q.type === 'truefalse' ? 'True/False' : (q.type === 'fillblank' ? 'Fill Blank' : (q.type === 'shortanswer' ? 'Short Answer' : (q.type === 'essay' ? 'Essay' : 'Matching'))));
-    let badgeClass = `badge-${q.type === 'mcq' ? 'mcq' : (q.type === 'truefalse' ? 'truefalse' : (q.type === 'fillblank' ? 'fillblank' : (q.type === 'shortanswer' ? 'shortanswer' : (q.type === 'essay' ? 'essay' : 'matching'))))}`;
-    let html = `<div class="card" style="margin-bottom:16px;"><h4>Question ${idx+1} <span class="${badgeClass}">${typeName}</span></h4>`;
+    let html = `<div class="card" style="margin-bottom:16px;"><h4>Question ${idx+1}</h4>`;
     html += `<input type="text" id="qt_${idx}" placeholder="Question text" value="${(q.text||'').replace(/"/g,'&quot;')}">`;
     html += `<input type="number" id="pts_${idx}" placeholder="Points" value="${q.points||1}">`;
-    
     if(q.type === 'mcq') {
       for(let i=0;i<4;i++) html += `<input type="text" id="opt_${idx}_${i}" placeholder="Option ${String.fromCharCode(65+i)}" value="${q.options[i]||''}">`;
       html += `<select id="cor_${idx}"><option value="0" ${q.correct==0?'selected':''}>A</option><option value="1" ${q.correct==1?'selected':''}>B</option><option value="2" ${q.correct==2?'selected':''}>C</option><option value="3" ${q.correct==3?'selected':''}>D</option></select>`;
@@ -513,30 +516,18 @@ function renderQuestionsList() {
     } else if(q.type === 'fillblank') {
       html += `<input type="text" id="cor_${idx}" placeholder="Correct answer" value="${q.correctAnswer||''}">`;
     } else if(q.type === 'shortanswer') {
-      html += `<input type="text" id="cor_${idx}" placeholder="Keywords (comma separated)" value="${(q.keywords||[]).join(',')}">`;
+      html += `<input type="text" id="cor_${idx}" placeholder="Keywords" value="${(q.keywords||[]).join(',')}">`;
     } else if(q.type === 'essay') {
-      html += `<p style="color:#94a3b8; font-size:12px;">📝 Essay question - Teacher will grade manually</p>`;
+      html += `<p style="color:#94a3b8;">📝 Essay question - Teacher grades manually</p>`;
     } else if(q.type === 'matching') {
-      html += `<div><strong>Matching Pairs:</strong><div id="matching-${idx}">`;
-      for(let i=0; i<Math.max(q.leftItems.length, 1); i++) {
-        let leftItem = q.leftItems[i] || {id: i+1, text: ''};
-        html += `<div class="matching-pair"><input id="left_${idx}_${i}" placeholder="Left ${leftItem.id}" value="${leftItem.text}" style="flex:2"><select id="correct_${idx}_${i}" style="width:100px;"><option value="">Match...</option>`;
-        for(let j=0; j<q.rightItems.length; j++) {
-          let r = q.rightItems[j];
-          let selected = (q.correctMatches && q.correctMatches[i] === r.id) ? 'selected' : '';
-          html += `<option value="${r.id}" ${selected}>${r.id}. ${r.text.substring(0,20)}</option>`;
-        }
-        html += `</select><button class="btn btn-danger" style="padding:4px 10px;" onclick="removeMatchingPair(${idx}, ${i})">✖️</button></div>`;
-      }
-      html += `<button class="btn btn-secondary" style="margin-top:5px;" onclick="addMatchingPair(${idx})">+ Add Pair</button></div></div>`;
+      html += `<div id="matching-${idx}"><div class="matching-pair"><input id="left_${idx}_0" placeholder="Left item"><span>⇔</span><input id="right_${idx}_0" placeholder="Right item"></div><button class="btn btn-secondary" onclick="addMatchingPair(${idx})">+ Add Pair</button></div>`;
     }
-    html += `<textarea id="exp_${idx}" rows="2" placeholder="Explanation (shown after quiz)">${q.explanation||''}</textarea>`;
-    html += `<button class="btn btn-danger" style="margin-top:8px;" onclick="removeQuestion(${idx})">Remove Question</button></div>`;
+    html += `<textarea id="exp_${idx}" rows="2" placeholder="Explanation">${q.explanation||''}</textarea>`;
+    html += `<button class="btn btn-danger" onclick="removeQuestion(${idx})">Remove</button></div>`;
     container.innerHTML += html;
     
     document.getElementById(`qt_${idx}`).onchange = (e) => questionsBank[idx].text = e.target.value;
     document.getElementById(`pts_${idx}`).onchange = (e) => questionsBank[idx].points = parseInt(e.target.value);
-    
     if(q.type === 'mcq') {
       for(let i=0;i<4;i++) document.getElementById(`opt_${idx}_${i}`).onchange = (e) => questionsBank[idx].options[i] = e.target.value;
       document.getElementById(`cor_${idx}`).onchange = (e) => questionsBank[idx].correct = parseInt(e.target.value);
@@ -545,28 +536,17 @@ function renderQuestionsList() {
     } else if(q.type === 'fillblank') {
       document.getElementById(`cor_${idx}`).onchange = (e) => questionsBank[idx].correctAnswer = e.target.value;
     } else if(q.type === 'shortanswer') {
-      document.getElementById(`cor_${idx}`).onchange = (e) => questionsBank[idx].keywords = e.target.value.split(',').map(k => k.trim());
-    } else if(q.type === 'matching') {
-      for(let i=0; i<questionsBank[idx].leftItems.length; i++) {
-        document.getElementById(`left_${idx}_${i}`).onchange = (e) => { if(!questionsBank[idx].leftItems[i]) questionsBank[idx].leftItems[i] = {id: i+1, text: ''}; questionsBank[idx].leftItems[i].text = e.target.value; };
-        document.getElementById(`correct_${idx}_${i}`).onchange = (e) => { if(!questionsBank[idx].correctMatches) questionsBank[idx].correctMatches = {}; questionsBank[idx].correctMatches[i] = e.target.value; };
-      }
+      document.getElementById(`cor_${idx}`).onchange = (e) => questionsBank[idx].keywords = e.target.value.split(',');
     }
     document.getElementById(`exp_${idx}`).onchange = (e) => questionsBank[idx].explanation = e.target.value;
   });
 }
 
 function addMatchingPair(idx) {
-  let newLeftId = questionsBank[idx].leftItems.length + 1;
-  let newRightId = String.fromCharCode(97 + questionsBank[idx].rightItems.length);
-  questionsBank[idx].leftItems.push({id: newLeftId, text: ''});
-  questionsBank[idx].rightItems.push({id: newRightId, text: ''});
-  renderQuestionsList();
-}
-
-function removeMatchingPair(idx, pairIdx) {
-  questionsBank[idx].leftItems.splice(pairIdx, 1);
-  questionsBank[idx].rightItems.splice(pairIdx, 1);
+  let newId = questionsBank[idx].leftItems.length + 1;
+  let newLetter = String.fromCharCode(97 + questionsBank[idx].rightItems.length);
+  questionsBank[idx].leftItems.push({id: newId, text: ''});
+  questionsBank[idx].rightItems.push({id: newLetter, text: ''});
   renderQuestionsList();
 }
 
@@ -588,10 +568,7 @@ async function saveQuiz() {
   let className = document.getElementById('quiz-class').value;
   let timeLimit = parseInt(document.getElementById('quiz-time').value);
   let schedule = document.getElementById('quiz-schedule').value;
-  if(!title) { alert('⚠️ Enter quiz title'); return; }
-  if(!subject) { alert('⚠️ Enter subject name'); return; }
-  if(!className) { alert('⚠️ Enter class name'); return; }
-  if(questionsBank.length === 0) { alert('⚠️ Add at least one question'); return; }
+  if(!title || !subject || !className || questionsBank.length === 0) { alert('Fill all fields'); return; }
   let publishAt = schedule ? new Date(schedule) : new Date();
   await db.collection('quizzes').add({ title, subject, className, timeLimit: timeLimit || 30, questions: questionsBank, teacherId: currentUser.uid, teacherName: currentUserData.name, publishAt, createdAt: new Date() });
   alert('✅ Quiz published!');
@@ -599,7 +576,7 @@ async function saveQuiz() {
   loadTeacherDashboard();
 }
 
-async function deleteQuiz(quizId) { if(confirm('Delete this quiz?')) { await db.collection('quizzes').doc(quizId).delete(); loadTeacherDashboard(); alert('✅ Quiz deleted'); } }
+async function deleteQuiz(quizId) { if(confirm('Delete?')) { await db.collection('quizzes').doc(quizId).delete(); loadTeacherDashboard(); } }
 
 // ========== ESSAY GRADING ==========
 async function loadPendingEssays() {
@@ -612,7 +589,7 @@ async function loadPendingEssays() {
       html += `<div class="card"><strong>${quiz.data().title}</strong><br>Student: ${student.data().name}<br><button class="btn btn-warning" onclick="openGradeModal('${r.id}', '${r.data().studentId}', '${r.data().quizId}')">Grade Essay</button></div>`;
     }
   }
-  document.getElementById('pending-essays-list').innerHTML = html || '<p>No pending essays to grade</p>';
+  document.getElementById('pending-essays-list').innerHTML = html || '<p>No pending essays</p>';
 }
 
 async function openGradeModal(resultId, studentId, quizId) {
@@ -626,13 +603,12 @@ async function openGradeModal(resultId, studentId, quizId) {
     if(questions[i].type === 'essay') {
       let currentGrade = (result.data().essayGrades && result.data().essayGrades[i]) || { points: 0, feedback: '' };
       html += `<div class="card"><h4>Question: ${questions[i].text}</h4>
-      <p><strong>Student's Answer:</strong></p><p style="background:rgba(255,255,255,0.05);padding:10px;border-radius:10px;">${essayAnswers[i] || 'No answer provided'}</p>
-      <p><strong>Points possible:</strong> ${questions[i].points}</p>
-      <input type="number" id="grade_${i}" placeholder="Points awarded" value="${currentGrade.points}" min="0" max="${questions[i].points}" style="width:100px; display:inline-block; margin-right:10px;">
-      <textarea id="feedback_${i}" placeholder="Feedback for student" rows="2">${currentGrade.feedback || ''}</textarea></div>`;
+      <p><strong>Answer:</strong> ${essayAnswers[i] || 'No answer'}</p>
+      <input type="number" id="grade_${i}" placeholder="Points" value="${currentGrade.points}" min="0" max="${questions[i].points}">
+      <textarea id="feedback_${i}" placeholder="Feedback">${currentGrade.feedback || ''}</textarea></div>`;
     }
   }
-  currentGradingResult = { resultId, studentId, quizId, questions };
+  currentGradingResult = { resultId, quiz: quiz.data(), result: result.data() };
   document.getElementById('grade-content').innerHTML = html;
   document.getElementById('grade-modal').style.display = 'flex';
 }
@@ -640,44 +616,181 @@ async function openGradeModal(resultId, studentId, quizId) {
 async function submitGrade() {
   if(!currentGradingResult) return;
   let essayGrades = {};
-  for(let i=0; i<currentGradingResult.questions.length; i++) {
-    if(currentGradingResult.questions[i].type === 'essay') {
-      let points = parseInt(document.getElementById(`grade_${i}`).value) || 0;
-      let feedback = document.getElementById(`feedback_${i}`).value;
-      essayGrades[i] = { points, feedback };
+  for(let i=0; i<currentGradingResult.quiz.questions.length; i++) {
+    if(currentGradingResult.quiz.questions[i].type === 'essay') {
+      essayGrades[i] = { points: parseInt(document.getElementById(`grade_${i}`).value) || 0, feedback: document.getElementById(`feedback_${i}`).value };
     }
   }
-  let result = await db.collection('quizResults').doc(currentGradingResult.resultId).get();
   let totalEarned = 0, totalPossible = 0;
-  for(let i=0; i<currentGradingResult.questions.length; i++) {
-    let q = currentGradingResult.questions[i];
+  for(let i=0; i<currentGradingResult.quiz.questions.length; i++) {
+    let q = currentGradingResult.quiz.questions[i];
     totalPossible += q.points;
-    if(q.type === 'essay' && essayGrades[i]) {
-      totalEarned += essayGrades[i].points;
-    } else if(q.type !== 'essay' && result.data().earnedPoints) {
-      totalEarned += (result.data().earnedPoints || 0);
-    }
+    if(q.type === 'essay') totalEarned += essayGrades[i].points;
+    else totalEarned += (currentGradingResult.result.earnedPoints || 0);
   }
   let newScore = Math.round((totalEarned / totalPossible) * 100);
-  await db.collection('quizResults').doc(currentGradingResult.resultId).update({ essayGrades: essayGrades, earnedPoints: totalEarned, score: newScore, needsGrading: false, gradedAt: new Date() });
-  
-  await db.collection('notifications').add({
-    userId: currentGradingResult.studentId,
-    message: `📝 Your essay for "${currentGradingResult.questions.find(q => q.type === 'essay')?.text.substring(0,50)}..." has been graded! Score: ${newScore}%`,
-    type: 'grade',
-    read: false,
-    createdAt: new Date()
-  });
-  
-  alert('✅ Essay graded successfully!');
+  await db.collection('quizResults').doc(currentGradingResult.resultId).update({ essayGrades, earnedPoints: totalEarned, score: newScore, needsGrading: false });
+  await db.collection('notifications').add({ userId: currentGradingResult.studentId, message: `📝 Your essay has been graded! Score: ${newScore}%`, read: false, createdAt: new Date() });
+  alert('✅ Graded!');
   closeGradeModal();
   loadTeacherDashboard();
   loadPendingEssays();
 }
 
-function closeGradeModal() { document.getElementById('grade-modal').style.display = 'none'; currentGradingResult = null; }
+function closeGradeModal() { document.getElementById('grade-modal').style.display = 'none'; }
 
-// ========== AUTH STATE LISTENER ==========
+// ========== QUIZ NAVIGATION ==========
+let currentQuizData = null;
+let currentQuestionIdx = 0;
+let totalQCount = 0;
+let answers = [];
+
+function changeQuestion(direction) {
+  let newIndex = currentQuestionIdx + direction;
+  if(newIndex >= 0 && newIndex < totalQCount) {
+    saveCurrentAnswer();
+    currentQuestionIdx = newIndex;
+    displayCurrentQuestion();
+  }
+}
+
+function saveCurrentAnswer() {
+  let q = currentQuizData.questions[currentQuestionIdx];
+  if(q.type === 'mcq') {
+    let selected = document.querySelector('.quiz-option.selected');
+    if(selected) answers[currentQuestionIdx] = Array.from(selected.parentElement.children).indexOf(selected);
+  } else if(q.type === 'truefalse') {
+    let selected = document.querySelector('.quiz-option.selected');
+    if(selected) answers[currentQuestionIdx] = selected.getAttribute('data-value') === 'true';
+  } else if(q.type === 'fillblank') {
+    let input = document.getElementById(`fill-${currentQuestionIdx}`);
+    if(input) answers[currentQuestionIdx] = input.value;
+  } else if(q.type === 'shortanswer') {
+    let input = document.getElementById(`short-${currentQuestionIdx}`);
+    if(input) answers[currentQuestionIdx] = input.value;
+  } else if(q.type === 'essay') {
+    let input = document.getElementById(`essay-${currentQuestionIdx}`);
+    if(input) answers[currentQuestionIdx] = input.value;
+  } else if(q.type === 'matching') {
+    let input = document.getElementById(`matching-${currentQuestionIdx}`);
+    if(input) answers[currentQuestionIdx] = input.value;
+  }
+}
+
+function displayCurrentQuestion() {
+  let qDiv = document.getElementById('quiz-questions');
+  let q = currentQuizData.questions[currentQuestionIdx];
+  let content = `<div class="card"><h4>${q.text}</h4><p>💰 Points: ${q.points || 1}</p>`;
+  if(q.type === 'mcq') {
+    content += `<div id="opts-${currentQuestionIdx}">`;
+    q.options.forEach((opt, oi) => {
+      let isSelected = (answers[currentQuestionIdx] === oi);
+      content += `<div class="quiz-option ${isSelected ? 'selected' : ''}" onclick="selectAnswer(${currentQuestionIdx}, ${oi})"><span>${String.fromCharCode(65+oi)}. ${opt}</span></div>`;
+    });
+    content += `</div>`;
+  } else if(q.type === 'truefalse') {
+    content += `<div><div class="quiz-option ${answers[currentQuestionIdx] === true ? 'selected' : ''}" onclick="selectTrueFalse(${currentQuestionIdx}, true)" data-value="true">✅ True</div>`;
+    content += `<div class="quiz-option ${answers[currentQuestionIdx] === false ? 'selected' : ''}" onclick="selectTrueFalse(${currentQuestionIdx}, false)" data-value="false">❌ False</div></div>`;
+  } else if(q.type === 'fillblank') {
+    content += `<input type="text" id="fill-${currentQuestionIdx}" placeholder="Your answer..." value="${answers[currentQuestionIdx] || ''}" onchange="saveFillAnswer(${currentQuestionIdx}, this.value)">`;
+  } else if(q.type === 'shortanswer') {
+    content += `<textarea id="short-${currentQuestionIdx}" rows="3" placeholder="Your answer..." onchange="saveShortAnswer(${currentQuestionIdx}, this.value)">${answers[currentQuestionIdx] || ''}</textarea>`;
+  } else if(q.type === 'essay') {
+    content += `<textarea id="essay-${currentQuestionIdx}" rows="5" placeholder="Your answer..." onchange="saveEssayAnswer(${currentQuestionIdx}, this.value)">${answers[currentQuestionIdx] || ''}</textarea>`;
+  } else if(q.type === 'matching') {
+    content += `<div class="matching-columns"><div class="matching-col-a"><strong>Column A</strong>`;
+    q.leftItems.forEach(item => { content += `<div class="matching-item"><strong>${item.id}.</strong> ${item.text}</div>`; });
+    content += `</div><div class="matching-col-b"><strong>Column B</strong>`;
+    q.rightItems.forEach(item => { content += `<div class="matching-item"><strong>${item.id}.</strong> ${item.text}</div>`; });
+    content += `</div></div>`;
+    content += `<input type="text" id="matching-${currentQuestionIdx}" placeholder="Matches (1=a,2=b)" value="${answers[currentQuestionIdx] || ''}" onchange="saveMatchingAnswer(${currentQuestionIdx}, this.value)">`;
+  }
+  content += `</div>`;
+  qDiv.innerHTML = content;
+  document.getElementById('question-counter').innerHTML = `Question ${currentQuestionIdx + 1} of ${totalQCount}`;
+  let prevBtn = document.getElementById('prev-question-btn');
+  let nextBtn = document.getElementById('next-question-btn');
+  if(prevBtn) prevBtn.style.display = currentQuestionIdx === 0 ? 'none' : 'block';
+  if(nextBtn) nextBtn.innerHTML = currentQuestionIdx === totalQCount - 1 ? 'Review All ▶' : 'Next ▶';
+}
+
+function saveFillAnswer(idx, val) { answers[idx] = val; }
+function saveShortAnswer(idx, val) { answers[idx] = val; }
+function saveEssayAnswer(idx, val) { answers[idx] = val; }
+function saveMatchingAnswer(idx, val) { answers[idx] = val; }
+function selectTrueFalse(idx, val) { answers[idx] = val; displayCurrentQuestion(); }
+function selectAnswer(idx, val) { answers[idx] = val; displayCurrentQuestion(); }
+
+async function startQuiz(quizId) {
+  let doc = await db.collection('quizzes').doc(quizId).get();
+  currentQuizData = { id: doc.id, ...doc.data() };
+  totalQCount = currentQuizData.questions.length;
+  currentQuestionIdx = 0;
+  answers = new Array(totalQCount).fill(null);
+  for(let i=0; i<totalQCount; i++) {
+    let q = currentQuizData.questions[i];
+    if(q.type === 'truefalse') answers[i] = null;
+    else if(q.type === 'mcq') answers[i] = -1;
+    else answers[i] = '';
+  }
+  document.getElementById('modal-quiz-title').innerText = currentQuizData.title;
+  displayCurrentQuestion();
+  let timeLeft = currentQuizData.timeLimit * 60;
+  let timerSpan = document.getElementById('quiz-timer');
+  if(quizTimer) clearInterval(quizTimer);
+  quizTimer = setInterval(() => {
+    let m = Math.floor(timeLeft/60), s = timeLeft%60;
+    timerSpan.innerText = `⏱️ ${m}:${s.toString().padStart(2,'0')}`;
+    if(timeLeft <= 0) { clearInterval(quizTimer); submitQuiz(); }
+    timeLeft--;
+  }, 1000);
+  document.getElementById('quiz-modal').style.display = 'flex';
+}
+
+let quizTimer = null;
+
+async function submitQuiz() {
+  clearInterval(quizTimer);
+  saveCurrentAnswer();
+  let totalPoints = 0, earnedPoints = 0, needsGrading = false;
+  for(let idx=0; idx<currentQuizData.questions.length; idx++) {
+    let q = currentQuizData.questions[idx];
+    let points = q.points || 1;
+    totalPoints += points;
+    if(q.type === 'mcq') { if(answers[idx] === q.correct) earnedPoints += points; }
+    else if(q.type === 'truefalse') { if(answers[idx] === q.correct) earnedPoints += points; }
+    else if(q.type === 'fillblank') { if(answers[idx] && answers[idx].toLowerCase().trim() === (q.correctAnswer || '').toLowerCase().trim()) earnedPoints += points; }
+    else if(q.type === 'shortanswer') { if(answers[idx] && answers[idx].length > 5) earnedPoints += points * 0.7; }
+    else if(q.type === 'essay') { needsGrading = true; }
+    else if(q.type === 'matching') {
+      let studentMatches = {};
+      if(answers[idx]) {
+        answers[idx].split(',').forEach(pair => {
+          let [num, letter] = pair.trim().split('=');
+          if(num && letter) studentMatches[parseInt(num)-1] = letter.trim().toLowerCase();
+        });
+      }
+      let correctCount = 0;
+      for(let i=0; i<q.leftItems.length; i++) {
+        if(studentMatches[i] && studentMatches[i] === q.correctMatches[i]) correctCount++;
+      }
+      earnedPoints += (correctCount / q.leftItems.length) * points;
+    }
+  }
+  let score = Math.round((earnedPoints / totalPoints) * 100);
+  await db.collection('quizResults').add({ quizId: currentQuizData.id, quizTitle: currentQuizData.title, studentId: currentUser.uid, studentName: currentUserData.name, score, earnedPoints, totalPoints, answers: answers, needsGrading, completedAt: new Date() });
+  if(needsGrading) {
+    await db.collection('notifications').add({ userId: currentQuizData.teacherId, message: `📝 ${currentUserData.name} submitted an essay for "${currentQuizData.title}". Please grade it.`, read: false, createdAt: new Date() });
+  }
+  alert(`🎉 Score: ${score}% (${Math.round(earnedPoints)}/${totalPoints} points)`);
+  document.getElementById('quiz-modal').style.display = 'none';
+  loadStudentDashboard();
+  loadLeaderboard();
+}
+
+function closeQuizModal() { if(quizTimer) clearInterval(quizTimer); document.getElementById('quiz-modal').style.display = 'none'; }
+
+// ========== AUTH STATE ==========
 auth.onAuthStateChanged(async (user) => {
   if(user) {
     currentUser = user;
@@ -694,7 +807,6 @@ auth.onAuthStateChanged(async (user) => {
       document.getElementById('navbar').style.display = 'flex';
       document.getElementById('auth-section').style.display = 'none';
       
-      // Load all features
       loadNotifications();
       setInterval(loadNotifications, 30000);
       db.collection('chatMessages').orderBy('timestamp', 'desc').limit(50).onSnapshot(() => loadChatMessages());
@@ -726,14 +838,14 @@ async function loadAdminDashboard() {
   document.getElementById('admin-students').innerText = students.size;
   document.getElementById('admin-quizzes').innerText = quizzes.size;
   let html = '';
-  teachers.forEach(t => { html += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);"><span>${t.data().name} (${t.data().email})</span><button class="btn btn-danger" style="padding:4px 12px;" onclick="deleteUser('${t.id}')">Delete</button></div>`; });
-  students.forEach(s => { html += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);"><span>${s.data().name} (${s.data().email})</span><button class="btn btn-danger" style="padding:4px 12px;" onclick="deleteUser('${s.id}')">Delete</button></div>`; });
+  teachers.forEach(t => { html += `<div style="display:flex;justify-content:space-between;padding:8px 0;"><span>${t.data().name}</span><button class="btn btn-danger" onclick="deleteUser('${t.id}')">Delete</button></div>`; });
+  students.forEach(s => { html += `<div style="display:flex;justify-content:space-between;padding:8px 0;"><span>${s.data().name}</span><button class="btn btn-danger" onclick="deleteUser('${s.id}')">Delete</button></div>`; });
   document.getElementById('admin-users-list').innerHTML = html;
 }
 
-async function deleteUser(uid) { if(confirm('Delete user?')){ await db.collection('users').doc(uid).delete(); loadAdminDashboard(); } }
-function showAddTeacherModal() { document.getElementById('modal-title').innerText = 'Add Teacher'; document.getElementById('modal-user-name').value = ''; document.getElementById('modal-user-email').value = ''; document.getElementById('modal-user-password').value = ''; document.getElementById('modal-user-school').value = currentUserData?.school || ''; document.getElementById('add-user-modal').style.display = 'flex'; window.pendingRole = 'teacher'; }
-function showAddStudentModal() { document.getElementById('modal-title').innerText = 'Add Student'; document.getElementById('modal-user-name').value = ''; document.getElementById('modal-user-email').value = ''; document.getElementById('modal-user-password').value = ''; document.getElementById('modal-user-school').value = currentUserData?.school || ''; document.getElementById('add-user-modal').style.display = 'flex'; window.pendingRole = 'student'; }
+async function deleteUser(uid) { if(confirm('Delete?')){ await db.collection('users').doc(uid).delete(); loadAdminDashboard(); } }
+function showAddTeacherModal() { document.getElementById('modal-title').innerText = 'Add Teacher'; document.getElementById('add-user-modal').style.display = 'flex'; window.pendingRole = 'teacher'; }
+function showAddStudentModal() { document.getElementById('modal-title').innerText = 'Add Student'; document.getElementById('add-user-modal').style.display = 'flex'; window.pendingRole = 'student'; }
 async function addUser() { let n=document.getElementById('modal-user-name').value, e=document.getElementById('modal-user-email').value, p=document.getElementById('modal-user-password').value, s=document.getElementById('modal-user-school').value, r=window.pendingRole; if(!n||!e||!p||!s){alert('Fill all');return;} let uc=await auth.createUserWithEmailAndPassword(e,p); await db.collection('users').doc(uc.user.uid).set({name:n,email:e,role:r,school:s,createdAt:new Date()}); alert(`✅ ${r} added`); closeModal(); loadAdminDashboard(); }
 function closeModal() { document.getElementById('add-user-modal').style.display = 'none'; }
 
@@ -751,9 +863,9 @@ async function loadTeacherDashboard() {
     let status = publishDate > now ? '⏰ Scheduled' : '📢 Published';
     let results = await db.collection('quizResults').where('quizId','==',q.id).get();
     let avg = results.size ? results.docs.reduce((a,b)=>a+b.data().score,0)/results.size : 0;
-    html += `<div class="card"><strong>${q.data().title}</strong><br>Subject: ${q.data().subject} | Class: ${q.data().className}<br>Status: ${status}<br>Avg: ${Math.round(avg)}% (${results.size} attempts)<br><button class="btn btn-danger" style="margin-top:10px;" onclick="deleteQuiz('${q.id}')">🗑️ Delete Quiz</button></div>`;
+    html += `<div class="card"><strong>${q.data().title}</strong><br>${q.data().subject} | ${q.data().className}<br>Status: ${status}<br>Avg: ${Math.round(avg)}%<br><button class="btn btn-danger" onclick="deleteQuiz('${q.id}')">Delete</button></div>`;
   }
-  document.getElementById('teacher-quizzes-list').innerHTML = html || '<p>No quizzes yet</p>';
+  document.getElementById('teacher-quizzes-list').innerHTML = html;
 }
 
 // ========== STUDENT FUNCTIONS ==========
@@ -764,7 +876,6 @@ async function loadStudentDashboard() {
   let avg = scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : 0;
   document.getElementById('student-taken').innerText = results.size;
   document.getElementById('student-avg-score').innerText = Math.round(avg)+'%';
-  
   let allQuizzes = await db.collection('quizzes').get();
   let takenIds = new Set(results.docs.map(r=>r.data().quizId));
   let now = new Date();
@@ -773,50 +884,34 @@ async function loadStudentDashboard() {
   for(let q of available) {
     availHtml += `<div class="card"><strong>${q.data().title}</strong><br>${q.data().subject} | ${q.data().className}<button class="btn btn-primary" style="margin-top:12px;" onclick="startQuiz('${q.id}')">Start Quiz</button></div>`;
   }
-  document.getElementById('available-quizzes').innerHTML = availHtml || '<p>No quizzes available</p>';
-  
-  let resultsHtml = '';
+  document.getElementById('available-quizzes').innerHTML = availHtml;
+  let resHtml = '';
   for(let r of results.docs) {
     let quiz = await db.collection('quizzes').doc(r.data().quizId).get();
     if(quiz.exists) {
-      let gradeStatus = r.data().needsGrading ? ' (Pending Teacher Grading)' : '';
-      resultsHtml += `<div class="card"><div style="display:flex;justify-content:space-between;"><div><strong>${quiz.data().title}</strong><br>Score: <span style="font-size:24px;font-weight:bold;color:${r.data().score>=60?'#22c55e':'#ef4444'}">${r.data().score}%</span>${gradeStatus}</div><button class="btn btn-secondary" onclick="showResultDetails('${quiz.id}', '${r.id}')">View Answers</button></div></div>`;
+      resHtml += `<div class="card"><strong>${quiz.data().title}</strong><br>Score: <span style="font-size:24px;font-weight:bold;color:${r.data().score>=60?'#22c55e':'#ef4444'}">${r.data().score}%</span><button class="btn btn-secondary" style="margin-left:10px;" onclick="showResultDetails('${quiz.id}', '${r.id}')">View</button></div>`;
     }
   }
-  document.getElementById('student-results').innerHTML = resultsHtml || '<p>No quizzes taken yet</p>';
+  document.getElementById('student-results').innerHTML = resHtml;
 }
 
 async function showResultDetails(quizId, resultId) {
-  let quizDoc = await db.collection('quizzes').doc(quizId).get();
-  let resultDoc = await db.collection('quizResults').doc(resultId).get();
-  let quiz = quizDoc.data();
-  let result = resultDoc.data();
+  let quiz = (await db.collection('quizzes').doc(quizId).get()).data();
+  let result = (await db.collection('quizResults').doc(resultId).get()).data();
   let html = '';
   for(let i=0; i<quiz.questions.length; i++) {
     let q = quiz.questions[i];
     let correctDisplay = '';
     if(q.type === 'mcq') {
       let correctLetter = String.fromCharCode(65 + q.correct);
-      correctDisplay = `<div class="explanation-box"><strong>✅ Correct Answer:</strong> ${correctLetter}. ${q.options[q.correct]}</div>`;
-    } else if(q.type === 'truefalse') {
-      correctDisplay = `<div class="explanation-box"><strong>✅ Correct Answer:</strong> ${q.correct ? 'True' : 'False'}</div>`;
-    } else if(q.type === 'fillblank') {
-      correctDisplay = `<div class="explanation-box"><strong>✅ Correct Answer:</strong> ${q.correctAnswer}</div>`;
-    } else if(q.type === 'shortanswer') {
-      correctDisplay = `<div class="explanation-box"><strong>✅ Keywords:</strong> ${(q.keywords||[]).join(', ')}</div>`;
+      correctDisplay = `<div class="explanation-box"><strong>✅ Correct:</strong> ${correctLetter}. ${q.options[q.correct]}</div>`;
     } else if(q.type === 'essay') {
-      let grade = (result.essayGrades && result.essayGrades[i]) || { points: 0, feedback: 'Not graded yet' };
-      correctDisplay = `<div class="explanation-box"><strong>📝 Teacher's Grade:</strong> ${grade.points}/${q.points} points<br><strong>Feedback:</strong> ${grade.feedback}</div>`;
-    } else if(q.type === 'matching') {
-      correctDisplay = `<div class="explanation-box"><strong>🔗 Correct Matching:</strong><br>`;
-      for(let li=0; li<q.leftItems.length; li++) {
-        let correctLetter = q.correctMatches ? q.correctMatches[li] : '?';
-        correctDisplay += `${q.leftItems[li].id}. ${q.leftItems[li].text} → ${correctLetter}. ${q.rightItems.find(r=>r.id===correctLetter)?.text || '?'}<br>`;
-      }
-      correctDisplay += `</div>`;
+      let grade = (result.essayGrades && result.essayGrades[i]) || { points: 0, feedback: 'Not graded' };
+      correctDisplay = `<div class="explanation-box"><strong>📝 Grade:</strong> ${grade.points}/${q.points}<br><strong>Feedback:</strong> ${grade.feedback}</div>`;
+    } else {
+      correctDisplay = `<div class="explanation-box"><strong>💡 Explanation:</strong> ${q.explanation || 'No explanation'}</div>`;
     }
-    if(q.explanation) { correctDisplay += `<div class="explanation-box"><strong>💡 Explanation:</strong> ${q.explanation}</div>`; }
-    html += `<div class="card"><h4>Q${i+1}: ${q.text}</h4><p>💰 Points: ${q.points || 1}</p>${correctDisplay}</div>`;
+    html += `<div class="card"><h4>Q${i+1}: ${q.text}</h4><p>💰 Points: ${q.points}</p>${correctDisplay}</div>`;
   }
   document.getElementById('results-content').innerHTML = html;
   document.getElementById('results-modal').style.display = 'flex';
@@ -824,176 +919,11 @@ async function showResultDetails(quizId, resultId) {
 
 function closeResultsModal() { document.getElementById('results-modal').style.display = 'none'; }
 
-// ========== NUMBERED QUIZ TAKING ==========
-function changeQuestion(direction) {
-  let newIndex = currentQuestionIndex + direction;
-  if(newIndex >= 0 && newIndex < totalQuestionsCount) {
-    saveCurrentAnswer();
-    currentQuestionIndex = newIndex;
-    displayCurrentQuestion();
-  }
-}
-
-function saveCurrentAnswer() {
-  let q = currentQuiz.questions[currentQuestionIndex];
-  if(q.type === 'mcq') {
-    let selected = document.querySelector('.quiz-option.selected');
-    if(selected) quizAnswers[currentQuestionIndex] = Array.from(selected.parentElement.children).indexOf(selected);
-  } else if(q.type === 'truefalse') {
-    let selected = document.querySelector('.quiz-option.selected');
-    if(selected) quizAnswers[currentQuestionIndex] = selected.getAttribute('data-value') === 'true';
-  } else if(q.type === 'fillblank') {
-    let input = document.getElementById(`fill-${currentQuestionIndex}`);
-    if(input) quizAnswers[currentQuestionIndex] = input.value;
-  } else if(q.type === 'shortanswer') {
-    let input = document.getElementById(`short-${currentQuestionIndex}`);
-    if(input) quizAnswers[currentQuestionIndex] = input.value;
-  } else if(q.type === 'essay') {
-    let input = document.getElementById(`essay-${currentQuestionIndex}`);
-    if(input) quizAnswers[currentQuestionIndex] = input.value;
-  } else if(q.type === 'matching') {
-    let input = document.getElementById(`matching-${currentQuestionIndex}`);
-    if(input) quizAnswers[currentQuestionIndex] = input.value;
-  }
-}
-
-function displayCurrentQuestion() {
-  let qDiv = document.getElementById('quiz-questions');
-  let q = currentQuiz.questions[currentQuestionIndex];
-  let typeNames = {mcq:'MCQ', truefalse:'True/False', fillblank:'Fill Blank', shortanswer:'Short Answer', essay:'Essay', matching:'Matching'};
-  let content = `<div class="card"><h4>${q.text} <span style="font-size:12px;color:#94a3b8;">(${typeNames[q.type]})</span></h4><p>💰 Points: ${q.points || 1}</p>`;
-  if(q.type === 'mcq') {
-    content += `<div id="opts-${currentQuestionIndex}">`;
-    q.options.forEach((opt, oi) => {
-      let isSelected = (quizAnswers[currentQuestionIndex] === oi);
-      content += `<div class="quiz-option ${isSelected ? 'selected' : ''}" onclick="selectAnswer(${currentQuestionIndex}, ${oi})"><span>${String.fromCharCode(65+oi)}. ${opt}</span></div>`;
-    });
-    content += `</div>`;
-  } else if(q.type === 'truefalse') {
-    let selectedTrue = quizAnswers[currentQuestionIndex] === true;
-    let selectedFalse = quizAnswers[currentQuestionIndex] === false;
-    content += `<div><div class="quiz-option ${selectedTrue ? 'selected' : ''}" onclick="selectTrueFalse(${currentQuestionIndex}, true)" data-value="true">✅ True</div>`;
-    content += `<div class="quiz-option ${selectedFalse ? 'selected' : ''}" onclick="selectTrueFalse(${currentQuestionIndex}, false)" data-value="false">❌ False</div></div>`;
-  } else if(q.type === 'fillblank') {
-    content += `<input type="text" id="fill-${currentQuestionIndex}" style="width:100%;padding:12px;border-radius:12px;" placeholder="Type your answer..." value="${quizAnswers[currentQuestionIndex] || ''}" onchange="saveFillAnswer(${currentQuestionIndex}, this.value)">`;
-  } else if(q.type === 'shortanswer') {
-    content += `<textarea id="short-${currentQuestionIndex}" rows="3" style="width:100%;padding:12px;border-radius:12px;" placeholder="Type your answer..." onchange="saveShortAnswer(${currentQuestionIndex}, this.value)">${quizAnswers[currentQuestionIndex] || ''}</textarea>`;
-  } else if(q.type === 'essay') {
-    content += `<textarea id="essay-${currentQuestionIndex}" rows="5" style="width:100%;padding:12px;border-radius:12px;" placeholder="Write your answer here..." onchange="saveEssayAnswer(${currentQuestionIndex}, this.value)">${quizAnswers[currentQuestionIndex] || ''}</textarea>`;
-  } else if(q.type === 'matching') {
-    content += `<div class="matching-columns"><div class="matching-col-a"><strong>Column A</strong>`;
-    q.leftItems.forEach(item => { content += `<div class="matching-item"><strong>${item.id}.</strong> ${item.text}</div>`; });
-    content += `</div><div class="matching-col-b"><strong>Column B</strong>`;
-    q.rightItems.forEach(item => { content += `<div class="matching-item"><strong>${item.id}.</strong> ${item.text}</div>`; });
-    content += `</div></div>`;
-    content += `<input type="text" id="matching-${currentQuestionIndex}" class="matching-answer-input" placeholder="Enter matches (example: 1=a, 2=b, 3=c)" value="${quizAnswers[currentQuestionIndex] || ''}" onchange="saveMatchingAnswer(${currentQuestionIndex}, this.value)">`;
-    content += `<p style="font-size:12px; color:#94a3b8; margin-top:5px;">📝 Format: number=letter (example: 1=a, 2=b, 3=c)</p>`;
-  }
-  content += `</div>`;
-  qDiv.innerHTML = content;
-  document.getElementById('question-counter').innerHTML = `Question ${currentQuestionIndex + 1} of ${totalQuestionsCount}`;
-  let prevBtn = document.getElementById('prev-question-btn');
-  let nextBtn = document.getElementById('next-question-btn');
-  prevBtn.style.display = currentQuestionIndex === 0 ? 'none' : 'block';
-  nextBtn.innerHTML = currentQuestionIndex === totalQuestionsCount - 1 ? 'Review All ▶' : 'Next ▶';
-}
-
-function saveFillAnswer(idx, val) { quizAnswers[idx] = val; }
-function saveShortAnswer(idx, val) { quizAnswers[idx] = val; }
-function saveEssayAnswer(idx, val) { quizAnswers[idx] = val; }
-function saveMatchingAnswer(idx, val) { quizAnswers[idx] = val; }
-function selectTrueFalse(idx, val) { quizAnswers[idx] = val; displayCurrentQuestion(); }
-
-async function startQuiz(quizId) {
-  let doc = await db.collection('quizzes').doc(quizId).get();
-  currentQuiz = { id: doc.id, ...doc.data() };
-  totalQuestionsCount = currentQuiz.questions.length;
-  currentQuestionIndex = 0;
-  quizAnswers = new Array(totalQuestionsCount).fill(null);
-  for(let i=0; i<totalQuestionsCount; i++) {
-    let q = currentQuiz.questions[i];
-    if(q.type === 'truefalse') quizAnswers[i] = null;
-    else if(q.type === 'mcq') quizAnswers[i] = -1;
-    else quizAnswers[i] = '';
-  }
-  document.getElementById('modal-quiz-title').innerText = currentQuiz.title;
-  displayCurrentQuestion();
-  let timeLeft = currentQuiz.timeLimit * 60;
-  let timerSpan = document.getElementById('quiz-timer');
-  if(quizTimer) clearInterval(quizTimer);
-  quizTimer = setInterval(() => {
-    let m = Math.floor(timeLeft/60), s = timeLeft%60;
-    timerSpan.innerText = `⏱️ Time Left: ${m}:${s.toString().padStart(2,'0')}`;
-    if(timeLeft <= 0) { clearInterval(quizTimer); alert('⏰ Time is up!'); submitQuiz(); }
-    timeLeft--;
-  }, 1000);
-  document.getElementById('quiz-modal').style.display = 'flex';
-}
-
-window.selectAnswer = (qIdx, optIdx) => { quizAnswers[qIdx] = optIdx; displayCurrentQuestion(); };
-window.selectTrueFalse = selectTrueFalse;
-window.saveFillAnswer = saveFillAnswer;
-window.saveShortAnswer = saveShortAnswer;
-window.saveEssayAnswer = saveEssayAnswer;
-window.saveMatchingAnswer = saveMatchingAnswer;
-window.changeQuestion = changeQuestion;
-
-async function submitQuiz() {
-  clearInterval(quizTimer);
-  saveCurrentAnswer();
-  let totalPoints = 0, earnedPoints = 0, needsGrading = false;
-  for(let idx=0; idx<currentQuiz.questions.length; idx++) {
-    let q = currentQuiz.questions[idx];
-    let points = q.points || 1;
-    totalPoints += points;
-    if(q.type === 'mcq') { if(quizAnswers[idx] === q.correct) earnedPoints += points; }
-    else if(q.type === 'truefalse') { if(quizAnswers[idx] === q.correct) earnedPoints += points; }
-    else if(q.type === 'fillblank') { if(quizAnswers[idx] && quizAnswers[idx].toLowerCase().trim() === (q.correctAnswer || '').toLowerCase().trim()) earnedPoints += points; }
-    else if(q.type === 'shortanswer') { if(quizAnswers[idx] && quizAnswers[idx].length > 5) earnedPoints += points * 0.7; else if(quizAnswers[idx] && quizAnswers[idx].length > 0) earnedPoints += points * 0.3; }
-    else if(q.type === 'essay') { needsGrading = true; }
-    else if(q.type === 'matching') {
-      let studentMatches = {};
-      if(quizAnswers[idx]) {
-        quizAnswers[idx].split(',').forEach(pair => {
-          let [num, letter] = pair.trim().split('=');
-          if(num && letter) studentMatches[parseInt(num)-1] = letter.trim().toLowerCase();
-        });
-      }
-      let correctCount = 0;
-      for(let i=0; i<q.leftItems.length; i++) {
-        if(studentMatches[i] && studentMatches[i] === q.correctMatches[i]) correctCount++;
-      }
-      earnedPoints += (correctCount / q.leftItems.length) * points;
-    }
-  }
-  let score = Math.round((earnedPoints / totalPoints) * 100);
-  await db.collection('quizResults').add({ quizId: currentQuiz.id, quizTitle: currentQuiz.title, studentId: currentUser.uid, studentName: currentUserData.name, score: score, earnedPoints: earnedPoints, totalPoints: totalPoints, answers: quizAnswers, needsGrading: needsGrading, completedAt: new Date() });
-  
-  if(needsGrading) {
-    let quiz = await db.collection('quizzes').doc(currentQuiz.id).get();
-    await db.collection('notifications').add({
-      userId: quiz.data().teacherId,
-      message: `📝 ${currentUserData.name} submitted an essay for "${currentQuiz.title}". Please grade it.`,
-      type: 'grading',
-      read: false,
-      createdAt: new Date()
-    });
-  }
-  
-  alert(needsGrading ? `🎉 Quiz submitted! Score: ${score}% (${Math.round(earnedPoints)}/${totalPoints} points)\n📝 Essay questions will be graded by your teacher.` : `🎉 Quiz Complete! Score: ${score}% (${Math.round(earnedPoints)}/${totalPoints} points)`);
-  document.getElementById('quiz-modal').style.display = 'none';
-  loadStudentDashboard();
-  loadLeaderboard();
-}
-
-function closeQuizModal() { if(quizTimer) clearInterval(quizTimer); document.getElementById('quiz-modal').style.display = 'none'; }
-
 // Make all functions global
 window.selectQuestionType = selectQuestionType;
 window.addSelectedQuestionType = addSelectedQuestionType;
 window.removeQuestion = removeQuestion;
 window.addMatchingPair = addMatchingPair;
-window.removeMatchingPair = removeMatchingPair;
 window.toggleCreateQuiz = toggleCreateQuiz;
 window.saveQuiz = saveQuiz;
 window.deleteQuiz = deleteQuiz;
