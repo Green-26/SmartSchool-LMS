@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="SmartSchool Pro - Complete Learning Management System with 6 Question Types, Leaderboard, and Notifications">
-  <meta name="keywords" content="LMS, Learning Management System, Online Quiz, Leaderboard, Notifications, Education, Rwanda">
+  <meta name="description" content="SmartSchool Pro - Complete Learning Management System with 6 Question Types, Leaderboard, Notifications, Live Chat, Schedule Quiz, Password Reset">
+  <meta name="keywords" content="LMS, Learning Management System, Online Quiz, Leaderboard, Notifications, Live Chat, Education, Rwanda">
   <meta name="author" content="SmartSchool Pro">
   <meta name="theme-color" content="#14b8a6">
-  <title>SmartSchool Pro | LMS with Leaderboard & Notifications</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SmartSchool Pro">
+  <title>SmartSchool Pro | Complete LMS - Leaderboard, Notifications, Live Chat</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -89,13 +92,22 @@
     .toast{position:fixed;bottom:20px;right:20px;background:rgba(20,184,166,0.9);color:white;padding:12px 20px;border-radius:40px;z-index:2000;animation:slideIn 0.3s ease;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
     @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
     
+    /* Chat Styles */
+    .chat-container{height:300px;overflow-y:auto;padding:10px;background:rgba(0,0,0,0.2);border-radius:16px;margin-bottom:12px;}
+    .chat-message{padding:10px;margin-bottom:10px;border-radius:12px;max-width:80%;}
+    .chat-message.sent{background:linear-gradient(135deg,#14b8a6,#0d9488);margin-left:auto;text-align:right;}
+    .chat-message.received{background:rgba(255,255,255,0.1);}
+    .chat-name{font-size:11px;opacity:0.7;margin-bottom:4px;}
+    .chat-text{word-wrap:break-word;}
+    .chat-time{font-size:9px;opacity:0.5;margin-top:4px;}
+    
     @media (max-width:768px){.type-selector{grid-template-columns:repeat(2,1fr);}}
   </style>
 </head>
 <body>
 <div class="container">
   <div class="card" style="background:linear-gradient(135deg,#14b8a6,#0d9488);text-align:center;">
-    <marquee>🏫 SmartSchool Pro | 6 Question Types | Leaderboard | Notifications | Timer | All Working! 🇷🇼</marquee>
+    <marquee>🏫 SmartSchool Pro | 6 Question Types | Leaderboard | Notifications | Live Chat | Schedule Quiz | Password Reset | All Working! 🇷🇼</marquee>
   </div>
 
   <div class="navbar" id="navbar" style="display:none;">
@@ -118,7 +130,7 @@
   <!-- Login Section -->
   <div id="auth-section" class="card" style="max-width:450px;margin:80px auto;text-align:center;">
     <h2 style="margin-bottom:20px;">🎓 SmartSchool Pro</h2>
-    <p style="margin-bottom:20px;color:#94a3b8;">Complete LMS with Leaderboard & Notifications</p>
+    <p style="margin-bottom:20px;color:#94a3b8;">Complete LMS | Leaderboard | Notifications | Live Chat</p>
     <div id="auth-error" style="display:none;background:rgba(239,68,68,0.2);border:1px solid #ef4444;border-radius:12px;padding:12px;margin-bottom:20px;"></div>
     <div id="login-form">
       <input type="email" id="login-email" placeholder="📧 Email">
@@ -129,7 +141,7 @@
         <option value="student">👨‍🎓 Student</option>
       </select>
       <button class="btn btn-primary" style="width:100%" onclick="login()">Login</button>
-      <p style="margin-top:16px;"><a href="#" onclick="showRegister()" style="color:#14b8a6;">✨ Create Account</a> | <a href="#" onclick="forgotPassword()" style="color:#14b8a6;">🔑 Forgot Password?</a></p>
+      <p style="margin-top:16px;"><a href="#" onclick="showRegister()" style="color:#14b8a6;">✨ Create Account</a> | <a href="#" onclick="showForgotPassword()" style="color:#14b8a6;">🔑 Forgot Password?</a></p>
     </div>
     <div id="register-form" style="display:none;">
       <input type="text" id="reg-name" placeholder="👤 Full Name">
@@ -143,6 +155,11 @@
       <button class="btn btn-primary" style="width:100%" onclick="register()">Register</button>
       <p style="margin-top:16px;"><a href="#" onclick="showLogin()" style="color:#14b8a6;">← Back to Login</a></p>
     </div>
+    <div id="forgot-form" style="display:none;">
+      <input type="email" id="reset-email" placeholder="📧 Your Email">
+      <button class="btn btn-primary" style="width:100%" onclick="sendPasswordReset()">Send Reset Email</button>
+      <p style="margin-top:16px;"><a href="#" onclick="showLogin()" style="color:#14b8a6;">← Back to Login</a></p>
+    </div>
   </div>
 
   <!-- Admin Dashboard -->
@@ -154,6 +171,7 @@
     </div>
     <div class="card"><h3>👑 Admin Controls</h3><div id="admin-users-list"></div><button class="btn btn-primary" onclick="showAddTeacherModal()">+ Add Teacher</button> <button class="btn btn-primary" onclick="showAddStudentModal()">+ Add Student</button></div>
     <div class="card"><h3>🏆 Global Leaderboard</h3><div id="global-leaderboard"></div></div>
+    <div class="card"><h3>💬 Live Chat</h3><div id="admin-chat" class="chat-container"></div><div style="display:flex;gap:10px;"><input type="text" id="admin-chat-input" placeholder="Type a message..." style="flex:1;"><button class="btn btn-primary" onclick="sendChatMessage()">Send</button></div></div>
   </div>
 
   <!-- Teacher Dashboard -->
@@ -169,6 +187,8 @@
         <input type="text" id="quiz-subject" placeholder="📚 Subject (type freely)">
         <input type="text" id="quiz-class" placeholder="🎓 Class (type freely)">
         <input type="number" id="quiz-time" placeholder="⏱️ Time Limit (minutes)" value="30">
+        <label>📅 Schedule Publish (optional):</label>
+        <input type="datetime-local" id="quiz-schedule">
         <div id="questions-list"></div>
         <div class="type-selector">
           <div class="type-card" onclick="selectQuestionType('mcq')" id="type-mcq-card"><strong>✅ MCQ</strong><br>Multiple Choice</div>
@@ -185,6 +205,7 @@
     <div class="card"><h3>📋 My Quizzes</h3><div id="teacher-quizzes-list"></div></div>
     <div class="card"><h3>📝 Pending Essay Grading</h3><div id="pending-essays-list"></div></div>
     <div class="card"><h3>🏆 Class Leaderboard</h3><div id="class-leaderboard"></div></div>
+    <div class="card"><h3>💬 Live Chat</h3><div id="teacher-chat" class="chat-container"></div><div style="display:flex;gap:10px;"><input type="text" id="teacher-chat-input" placeholder="Type a message..." style="flex:1;"><button class="btn btn-primary" onclick="sendChatMessage()">Send</button></div></div>
   </div>
 
   <!-- Student Dashboard -->
@@ -197,6 +218,7 @@
     <div class="card"><h3>🏆 Leaderboard</h3><div id="student-leaderboard"></div></div>
     <div class="card"><h3>📚 Available Quizzes</h3><div id="available-quizzes"></div></div>
     <div class="card"><h3>🏆 My Results</h3><div id="student-results"></div></div>
+    <div class="card"><h3>💬 Live Chat</h3><div id="student-chat" class="chat-container"></div><div style="display:flex;gap:10px;"><input type="text" id="student-chat-input" placeholder="Type a message..." style="flex:1;"><button class="btn btn-primary" onclick="sendChatMessage()">Send</button></div></div>
   </div>
 
   <!-- Quiz Modal -->
@@ -236,8 +258,7 @@ const firebaseConfig = {
   projectId: "smartschool-lms-14af7",
   storageBucket: "smartschool-lms-14af7.firebasestorage.app",
   messagingSenderId: "997605998312",
-  appId: "1:997605998312:web:c0192bb87b13ba38fb135d",
-  measurementId: "G-CFNTTVQT9Z"
+  appId: "1:997605998312:web:c0192bb87b13ba38fb135d"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -252,9 +273,65 @@ let currentGradingResult = null;
 let currentQuestionIndex = 0;
 let totalQuestionsCount = 0;
 
+// ========== PASSWORD RESET ==========
+function showForgotPassword() {
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('register-form').style.display = 'none';
+  document.getElementById('forgot-form').style.display = 'block';
+}
+async function sendPasswordReset() {
+  let email = document.getElementById('reset-email').value;
+  if(!email) { alert('Enter your email'); return; }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    alert('✅ Password reset email sent! Check your inbox.');
+    showLogin();
+  } catch(err) { alert('Error: ' + err.message); }
+}
+
+// ========== LIVE CHAT ==========
+let currentUserRoleGlobal = null;
+let currentUserDataGlobal = null;
+
+async function sendChatMessage() {
+  let inputId = currentUserRoleGlobal + '-chat-input';
+  let input = document.getElementById(inputId);
+  if(!input || !input.value.trim()) return;
+  await db.collection('chatMessages').add({
+    senderId: currentUser.uid,
+    senderName: currentUserDataGlobal.name,
+    senderRole: currentUserRoleGlobal,
+    message: input.value.trim(),
+    timestamp: new Date(),
+    room: 'general'
+  });
+  input.value = '';
+}
+
+async function loadChatMessages() {
+  if(!currentUser) return;
+  let messages = await db.collection('chatMessages').orderBy('timestamp', 'desc').limit(50).get();
+  let chatDivId = currentUserRoleGlobal + '-chat';
+  let chatDiv = document.getElementById(chatDivId);
+  if(!chatDiv) return;
+  let html = '';
+  let messagesArray = [];
+  messages.forEach(doc => messagesArray.push(doc.data()));
+  messagesArray.reverse();
+  messagesArray.forEach(m => {
+    let isSent = m.senderId === currentUser.uid;
+    html += `<div class="chat-message ${isSent ? 'sent' : 'received'}">
+      <div class="chat-name">${m.senderName} (${m.senderRole})</div>
+      <div class="chat-text">${m.message}</div>
+      <div class="chat-time">${new Date(m.timestamp?.toDate()).toLocaleTimeString()}</div>
+    </div>`;
+  });
+  chatDiv.innerHTML = html || '<p style="text-align:center;color:#94a3b8;">No messages yet. Start chatting!</p>';
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
 // ========== NOTIFICATION FUNCTIONS ==========
 async function showNotification(message, type = 'info') {
-  // Save to Firestore
   await db.collection('notifications').add({
     userId: currentUser.uid,
     message: message,
@@ -262,8 +339,6 @@ async function showNotification(message, type = 'info') {
     read: false,
     createdAt: new Date()
   });
-  
-  // Show toast
   let toast = document.createElement('div');
   toast.className = 'toast';
   toast.innerHTML = message;
@@ -278,7 +353,6 @@ async function loadNotifications() {
     .orderBy('createdAt', 'desc')
     .limit(20)
     .get();
-  
   let unreadCount = 0;
   let html = '';
   notifications.forEach(doc => {
@@ -289,7 +363,6 @@ async function loadNotifications() {
       <div class="notification-time">${new Date(n.createdAt?.toDate()).toLocaleString()}</div>
     </div>`;
   });
-  
   document.getElementById('notifications-list').innerHTML = html || '<div style="padding:12px;text-align:center;">No notifications</div>';
   let badge = document.getElementById('notification-badge');
   if(unreadCount > 0) {
@@ -339,8 +412,7 @@ async function loadLeaderboard() {
   }
   leaderboard.sort((a,b) => b.totalPoints - a.totalPoints);
   
-  let html = `<table class="leaderboard-table">
-    <thead><tr><th>Rank</th><th>Student</th><th>Total Points</th><th>Quizzes</th><th>Avg Score</th></tr></thead><tbody>`;
+  let html = `<table class="leaderboard-table"><thead><tr><th>Rank</th><th>Student</th><th>Total Points</th><th>Quizzes</th><th>Avg Score</th></tr></thead><tbody>`;
   leaderboard.forEach((s, idx) => {
     let rankClass = '';
     let medal = '';
@@ -397,9 +469,8 @@ async function login() {
 }
 
 async function logout() { await auth.signOut(); window.location.reload(); }
-function showRegister() { document.getElementById('login-form').style.display = 'none'; document.getElementById('register-form').style.display = 'block'; }
-function showLogin() { document.getElementById('register-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; }
-function forgotPassword() { let e = prompt('Enter email:'); if(e) auth.sendPasswordResetEmail(e).then(() => alert('Reset email sent!')); }
+function showRegister() { document.getElementById('login-form').style.display = 'none'; document.getElementById('register-form').style.display = 'block'; document.getElementById('forgot-form').style.display = 'none'; }
+function showLogin() { document.getElementById('register-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; document.getElementById('forgot-form').style.display = 'none'; }
 
 // ========== QUESTION BUILDER ==========
 function selectQuestionType(type) {
@@ -516,11 +587,13 @@ async function saveQuiz() {
   let subject = document.getElementById('quiz-subject').value;
   let className = document.getElementById('quiz-class').value;
   let timeLimit = parseInt(document.getElementById('quiz-time').value);
+  let schedule = document.getElementById('quiz-schedule').value;
   if(!title) { alert('⚠️ Enter quiz title'); return; }
   if(!subject) { alert('⚠️ Enter subject name'); return; }
   if(!className) { alert('⚠️ Enter class name'); return; }
   if(questionsBank.length === 0) { alert('⚠️ Add at least one question'); return; }
-  await db.collection('quizzes').add({ title, subject, className, timeLimit: timeLimit || 30, questions: questionsBank, teacherId: currentUser.uid, teacherName: currentUserData.name, createdAt: new Date() });
+  let publishAt = schedule ? new Date(schedule) : new Date();
+  await db.collection('quizzes').add({ title, subject, className, timeLimit: timeLimit || 30, questions: questionsBank, teacherId: currentUser.uid, teacherName: currentUserData.name, publishAt, createdAt: new Date() });
   alert('✅ Quiz published!');
   toggleCreateQuiz();
   loadTeacherDashboard();
@@ -588,8 +661,6 @@ async function submitGrade() {
   let newScore = Math.round((totalEarned / totalPossible) * 100);
   await db.collection('quizResults').doc(currentGradingResult.resultId).update({ essayGrades: essayGrades, earnedPoints: totalEarned, score: newScore, needsGrading: false, gradedAt: new Date() });
   
-  // Send notification to student
-  let student = await db.collection('users').doc(currentGradingResult.studentId).get();
   await db.collection('notifications').add({
     userId: currentGradingResult.studentId,
     message: `📝 Your essay for "${currentGradingResult.questions.find(q => q.type === 'essay')?.text.substring(0,50)}..." has been graded! Score: ${newScore}%`,
@@ -614,6 +685,8 @@ auth.onAuthStateChanged(async (user) => {
     if(doc.exists) {
       currentUserData = doc.data();
       currentUserRole = currentUserData.role;
+      currentUserRoleGlobal = currentUserRole;
+      currentUserDataGlobal = currentUserData;
       document.getElementById('user-name').innerText = currentUserData.name;
       let roleSpan = document.getElementById('user-role');
       roleSpan.innerText = currentUserRole === 'admin' ? '👑 Admin' : (currentUserRole === 'teacher' ? '👨‍🏫 Teacher' : '👨‍🎓 Student');
@@ -621,9 +694,10 @@ auth.onAuthStateChanged(async (user) => {
       document.getElementById('navbar').style.display = 'flex';
       document.getElementById('auth-section').style.display = 'none';
       
-      // Load notifications and leaderboard
+      // Load all features
       loadNotifications();
-      setInterval(loadNotifications, 30000); // Refresh every 30 seconds
+      setInterval(loadNotifications, 30000);
+      db.collection('chatMessages').orderBy('timestamp', 'desc').limit(50).onSnapshot(() => loadChatMessages());
       
       if(currentUserRole === 'admin') { loadAdminDashboard(); loadLeaderboard(); }
       else if(currentUserRole === 'teacher') { loadTeacherDashboard(); loadPendingEssays(); loadLeaderboard(); }
@@ -670,11 +744,14 @@ async function loadTeacherDashboard() {
   let students = await db.collection('users').where('role','==','student').get();
   document.getElementById('teacher-quizzes-count').innerText = quizzes.size;
   document.getElementById('teacher-students-count').innerText = students.size;
+  let now = new Date();
   let html = '';
   for(let q of quizzes.docs) {
+    let publishDate = q.data().publishAt?.toDate() || new Date(q.data().createdAt?.toDate());
+    let status = publishDate > now ? '⏰ Scheduled' : '📢 Published';
     let results = await db.collection('quizResults').where('quizId','==',q.id).get();
     let avg = results.size ? results.docs.reduce((a,b)=>a+b.data().score,0)/results.size : 0;
-    html += `<div class="card"><strong>${q.data().title}</strong><br>Subject: ${q.data().subject} | Class: ${q.data().className}<br>Avg: ${Math.round(avg)}% (${results.size} attempts)<br><button class="btn btn-danger" style="margin-top:10px;" onclick="deleteQuiz('${q.id}')">🗑️ Delete Quiz</button></div>`;
+    html += `<div class="card"><strong>${q.data().title}</strong><br>Subject: ${q.data().subject} | Class: ${q.data().className}<br>Status: ${status}<br>Avg: ${Math.round(avg)}% (${results.size} attempts)<br><button class="btn btn-danger" style="margin-top:10px;" onclick="deleteQuiz('${q.id}')">🗑️ Delete Quiz</button></div>`;
   }
   document.getElementById('teacher-quizzes-list').innerHTML = html || '<p>No quizzes yet</p>';
 }
@@ -690,7 +767,8 @@ async function loadStudentDashboard() {
   
   let allQuizzes = await db.collection('quizzes').get();
   let takenIds = new Set(results.docs.map(r=>r.data().quizId));
-  let available = allQuizzes.docs.filter(q=>!takenIds.has(q.id));
+  let now = new Date();
+  let available = allQuizzes.docs.filter(q => !takenIds.has(q.id) && (!q.data().publishAt || q.data().publishAt.toDate() <= now));
   let availHtml = '';
   for(let q of available) {
     availHtml += `<div class="card"><strong>${q.data().title}</strong><br>${q.data().subject} | ${q.data().className}<button class="btn btn-primary" style="margin-top:12px;" onclick="startQuiz('${q.id}')">Start Quiz</button></div>`;
@@ -891,7 +969,6 @@ async function submitQuiz() {
   let score = Math.round((earnedPoints / totalPoints) * 100);
   await db.collection('quizResults').add({ quizId: currentQuiz.id, quizTitle: currentQuiz.title, studentId: currentUser.uid, studentName: currentUserData.name, score: score, earnedPoints: earnedPoints, totalPoints: totalPoints, answers: quizAnswers, needsGrading: needsGrading, completedAt: new Date() });
   
-  // Send notification to teacher if essay needs grading
   if(needsGrading) {
     let quiz = await db.collection('quizzes').doc(currentQuiz.id).get();
     await db.collection('notifications').add({
@@ -939,6 +1016,9 @@ window.selectTrueFalse = selectTrueFalse;
 window.toggleNotifications = toggleNotifications;
 window.markAllNotificationsRead = markAllNotificationsRead;
 window.markNotificationRead = markNotificationRead;
+window.sendChatMessage = sendChatMessage;
+window.showForgotPassword = showForgotPassword;
+window.sendPasswordReset = sendPasswordReset;
 </script>
 </body>
 </html>
