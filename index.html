@@ -10,7 +10,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SmartSchool Pro">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
   <title>SmartSchool Pro | Complete Learning Management System</title>
   
   <!-- Firebase SDKs -->
@@ -33,6 +32,11 @@
     .btn-warning{background:#f59e0b;color:white;}
     input,select,textarea{width:100%;padding:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;margin-bottom:12px;color:white;}
     input:focus,select:focus,textarea:focus{outline:none;border-color:#14b8a6;}
+    
+    /* Fix for select dropdown options - makes text visible */
+    select option{background:#1a1a2e;color:white;}
+    .login-select{background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);}
+    
     .dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:24px;}
     .stat-card{background:linear-gradient(135deg,rgba(20,184,166,0.2),rgba(13,148,136,0.1));border-radius:20px;padding:24px;text-align:center;border:1px solid rgba(20,184,166,0.3);}
     .stat-value{font-size:36px;font-weight:bold;color:#14b8a6;}
@@ -40,7 +44,7 @@
     .quiz-option:hover{transform:translateX(5px);border-color:#14b8a6;}
     .quiz-option.selected{border-color:#14b8a6;background:rgba(20,184,166,0.15);}
     .type-selector{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:15px 0;}
-    .type-card{text-align:center;padding:12px;border:1px solid rgba(255,255,255,0.1);border-radius:16px;cursor:pointer;transition:all 0.2s;background:rgba(18,18,35,0.6);}
+    .type-card{text-align:center;padding:12px;border:1px solid rgba(255,255,255,0.1);border-radius:16px;cursor:pointer;transition:all 0.2s;background:rgba(18,18,35,0.6);color:white;}
     .type-card:hover{transform:translateY(-2px);border-color:#14b8a6;}
     .type-card.selected{border-color:#14b8a6;background:rgba(20,184,166,0.15);}
     .timer{font-size:28px;font-weight:bold;text-align:center;color:#14b8a6;margin:16px 0;font-family:monospace;}
@@ -53,10 +57,6 @@
     .role-teacher{background:#14b8a6;}
     .role-student{background:#f59e0b;}
     .question-counter{background:#14b8a6;border-radius:30px;padding:4px 12px;font-size:12px;display:inline-block;}
-    
-    /* PWA Install Button */
-    .install-pwa-btn{background:#14b8a6;color:white;border:none;padding:8px 16px;border-radius:40px;cursor:pointer;font-size:13px;margin-left:15px;font-weight:bold;transition:all 0.2s;}
-    .install-pwa-btn:hover{background:#0d9488;transform:scale(1.02);}
     
     /* Leaderboard */
     .leaderboard-table{width:100%;border-collapse:collapse;}
@@ -95,8 +95,8 @@
     .matching-columns{display:flex;gap:30px;margin-bottom:20px;flex-wrap:wrap;}
     .matching-col-a{flex:1;background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;}
     .matching-col-b{flex:1;background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;}
-    .matching-item{padding:10px;margin:8px 0;background:rgba(255,255,255,0.03);border-radius:8px;}
-    .explanation-box{background:rgba(34,197,94,0.1);border-left:4px solid #22c55e;padding:12px;margin-top:12px;border-radius:10px;}
+    .matching-item{padding:10px;margin:8px 0;background:rgba(255,255,255,0.03);border-radius:8px;color:white;}
+    .explanation-box{background:rgba(34,197,94,0.1);border-left:4px solid #22c55e;padding:12px;margin-top:12px;border-radius:10px;color:white;}
     
     @media (max-width:768px){.type-selector{grid-template-columns:repeat(2,1fr);}}
   </style>
@@ -104,14 +104,11 @@
 <body>
 <div class="container">
   <div class="card" style="background:linear-gradient(135deg,#14b8a6,#0d9488);text-align:center;">
-    <marquee>🏫 SmartSchool Pro | 6 Question Types | Leaderboard | Notifications | Live Chat | Schedule Quiz | Install App on Phone! 🇷🇼</marquee>
+    <marquee>🏫 SmartSchool Pro | 6 Question Types | Leaderboard | Notifications | Live Chat | Schedule Quiz | Password Reset | Rwanda 🇷🇼</marquee>
   </div>
 
   <div class="navbar" id="navbar" style="display:none;">
-    <div class="logo">
-      🎓 SmartSchool Pro
-      <button id="installPwaBtn" class="install-pwa-btn" style="display:none;">📱 Install App</button>
-    </div>
+    <div class="logo">🎓 SmartSchool Pro</div>
     <div class="user-badge">
       <div class="notification-bell" onclick="toggleNotifications()">
         🔔
@@ -133,30 +130,30 @@
     <p style="margin-bottom:20px;color:#94a3b8;">Complete LMS | Leaderboard | Notifications | Live Chat</p>
     <div id="auth-error" style="display:none;background:rgba(239,68,68,0.2);border:1px solid #ef4444;border-radius:12px;padding:12px;margin-bottom:20px;"></div>
     <div id="login-form">
-      <input type="email" id="login-email" placeholder="📧 Email">
-      <input type="password" id="login-password" placeholder="🔒 Password">
-      <select id="login-role">
-        <option value="admin">👑 Admin</option>
-        <option value="teacher">👨‍🏫 Teacher</option>
-        <option value="student">👨‍🎓 Student</option>
+      <input type="email" id="login-email" placeholder="📧 Email" style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);">
+      <input type="password" id="login-password" placeholder="🔒 Password" style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);">
+      <select id="login-role" class="login-select" style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);">
+        <option value="admin" style="background:#1a1a2e;color:white;">👑 Admin</option>
+        <option value="teacher" style="background:#1a1a2e;color:white;">👨‍🏫 Teacher</option>
+        <option value="student" style="background:#1a1a2e;color:white;">👨‍🎓 Student</option>
       </select>
       <button class="btn btn-primary" style="width:100%" onclick="login()">Login</button>
       <p style="margin-top:16px;"><a href="#" onclick="showRegister()" style="color:#14b8a6;">✨ Create Account</a> | <a href="#" onclick="showForgotPassword()" style="color:#14b8a6;">🔑 Forgot Password?</a></p>
     </div>
     <div id="register-form" style="display:none;">
-      <input type="text" id="reg-name" placeholder="👤 Full Name">
-      <input type="email" id="reg-email" placeholder="📧 Email">
-      <input type="password" id="reg-password" placeholder="🔒 Password">
-      <select id="reg-role">
-        <option value="teacher">👨‍🏫 Teacher</option>
-        <option value="student">👨‍🎓 Student</option>
+      <input type="text" id="reg-name" placeholder="👤 Full Name" style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);">
+      <input type="email" id="reg-email" placeholder="📧 Email" style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);">
+      <input type="password" id="reg-password" placeholder="🔒 Password" style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);">
+      <select id="reg-role" class="login-select" style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);">
+        <option value="teacher" style="background:#1a1a2e;color:white;">👨‍🏫 Teacher</option>
+        <option value="student" style="background:#1a1a2e;color:white;">👨‍🎓 Student</option>
       </select>
-      <input type="text" id="reg-school" placeholder="🏫 School Name">
+      <input type="text" id="reg-school" placeholder="🏫 School Name" style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);">
       <button class="btn btn-primary" style="width:100%" onclick="register()">Register</button>
       <p style="margin-top:16px;"><a href="#" onclick="showLogin()" style="color:#14b8a6;">← Back to Login</a></p>
     </div>
     <div id="forgot-form" style="display:none;">
-      <input type="email" id="reset-email" placeholder="📧 Your Email">
+      <input type="email" id="reset-email" placeholder="📧 Your Email" style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);">
       <button class="btn btn-primary" style="width:100%" onclick="sendPasswordReset()">Send Reset Email</button>
       <p style="margin-top:16px;"><a href="#" onclick="showLogin()" style="color:#14b8a6;">← Back to Login</a></p>
     </div>
@@ -171,7 +168,7 @@
     </div>
     <div class="card"><h3>👑 Admin Controls</h3><div id="admin-users-list"></div><button class="btn btn-primary" onclick="showAddTeacherModal()">+ Add Teacher</button> <button class="btn btn-primary" onclick="showAddStudentModal()">+ Add Student</button></div>
     <div class="card"><h3>🏆 Global Leaderboard</h3><div id="global-leaderboard"></div></div>
-    <div class="card"><h3>💬 Live Chat</h3><div id="admin-chat" class="chat-container"></div><div style="display:flex;gap:10px;"><input type="text" id="admin-chat-input" placeholder="Type a message..." style="flex:1;"><button class="btn btn-primary" onclick="sendChatMessage()">Send</button></div></div>
+    <div class="card"><h3>💬 Live Chat</h3><div id="admin-chat" class="chat-container"></div><div style="display:flex;gap:10px;"><input type="text" id="admin-chat-input" placeholder="Type a message..." style="flex:1;background:rgba(255,255,255,0.05);color:white;"><button class="btn btn-primary" onclick="sendChatMessage()">Send</button></div></div>
   </div>
 
   <!-- Teacher Dashboard -->
@@ -183,12 +180,12 @@
     <div class="card">
       <div style="display:flex;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;"><h3>📝 Create Quiz</h3><button class="btn btn-primary" onclick="toggleCreateQuiz()">+ New Quiz</button></div>
       <div id="create-quiz-form" style="display:none;">
-        <input type="text" id="quiz-title" placeholder="📌 Quiz Title">
-        <input type="text" id="quiz-subject" placeholder="📚 Subject (type freely)">
-        <input type="text" id="quiz-class" placeholder="🎓 Class (type freely)">
-        <input type="number" id="quiz-time" placeholder="⏱️ Time Limit (minutes)" value="30">
-        <label>📅 Schedule Publish (optional):</label>
-        <input type="datetime-local" id="quiz-schedule">
+        <input type="text" id="quiz-title" placeholder="📌 Quiz Title" style="background:rgba(255,255,255,0.05);color:white;">
+        <input type="text" id="quiz-subject" placeholder="📚 Subject (type freely)" style="background:rgba(255,255,255,0.05);color:white;">
+        <input type="text" id="quiz-class" placeholder="🎓 Class (type freely)" style="background:rgba(255,255,255,0.05);color:white;">
+        <input type="number" id="quiz-time" placeholder="⏱️ Time Limit (minutes)" value="30" style="background:rgba(255,255,255,0.05);color:white;">
+        <label style="color:#94a3b8;">📅 Schedule Publish (optional):</label>
+        <input type="datetime-local" id="quiz-schedule" style="background:rgba(255,255,255,0.05);color:white;">
         <div id="questions-list"></div>
         <div class="type-selector">
           <div class="type-card" onclick="selectQuestionType('mcq')" id="type-mcq-card"><strong>✅ MCQ</strong></div>
@@ -205,7 +202,7 @@
     <div class="card"><h3>📋 My Quizzes</h3><div id="teacher-quizzes-list"></div></div>
     <div class="card"><h3>📝 Pending Essay Grading</h3><div id="pending-essays-list"></div></div>
     <div class="card"><h3>🏆 Class Leaderboard</h3><div id="class-leaderboard"></div></div>
-    <div class="card"><h3>💬 Live Chat</h3><div id="teacher-chat" class="chat-container"></div><div style="display:flex;gap:10px;"><input type="text" id="teacher-chat-input" placeholder="Type a message..." style="flex:1;"><button class="btn btn-primary" onclick="sendChatMessage()">Send</button></div></div>
+    <div class="card"><h3>💬 Live Chat</h3><div id="teacher-chat" class="chat-container"></div><div style="display:flex;gap:10px;"><input type="text" id="teacher-chat-input" placeholder="Type a message..." style="flex:1;background:rgba(255,255,255,0.05);color:white;"><button class="btn btn-primary" onclick="sendChatMessage()">Send</button></div></div>
   </div>
 
   <!-- Student Dashboard -->
@@ -218,7 +215,7 @@
     <div class="card"><h3>🏆 Leaderboard</h3><div id="student-leaderboard"></div></div>
     <div class="card"><h3>📚 Available Quizzes</h3><div id="available-quizzes"></div></div>
     <div class="card"><h3>🏆 My Results</h3><div id="student-results"></div></div>
-    <div class="card"><h3>💬 Live Chat</h3><div id="student-chat" class="chat-container"></div><div style="display:flex;gap:10px;"><input type="text" id="student-chat-input" placeholder="Type a message..." style="flex:1;"><button class="btn btn-primary" onclick="sendChatMessage()">Send</button></div></div>
+    <div class="card"><h3>💬 Live Chat</h3><div id="student-chat" class="chat-container"></div><div style="display:flex;gap:10px;"><input type="text" id="student-chat-input" placeholder="Type a message..." style="flex:1;background:rgba(255,255,255,0.05);color:white;"><button class="btn btn-primary" onclick="sendChatMessage()">Send</button></div></div>
   </div>
 
   <!-- Quiz Modal -->
@@ -231,7 +228,7 @@
   <div id="grade-modal" class="modal" style="display:none;"><div class="modal-content"><div class="card"><h3>📝 Grade Essay</h3><div id="grade-content"></div><button class="btn btn-primary" onclick="submitGrade()">Submit Grade</button><button class="btn btn-secondary" onclick="closeGradeModal()">Cancel</button></div></div></div>
 
   <!-- Add User Modal -->
-  <div id="add-user-modal" class="modal" style="display:none;"><div class="modal-content"><div class="card"><h3 id="modal-title">Add User</h3><input id="modal-user-name" placeholder="Name"><input id="modal-user-email" placeholder="Email"><input type="password" id="modal-user-password" placeholder="Password"><input id="modal-user-school" placeholder="School"><button class="btn btn-primary" onclick="addUser()">Add</button><button class="btn btn-secondary" onclick="closeModal()">Cancel</button></div></div></div>
+  <div id="add-user-modal" class="modal" style="display:none;"><div class="modal-content"><div class="card"><h3 id="modal-title">Add User</h3><input id="modal-user-name" placeholder="Name" style="background:rgba(255,255,255,0.05);color:white;"><input id="modal-user-email" placeholder="Email" style="background:rgba(255,255,255,0.05);color:white;"><input type="password" id="modal-user-password" placeholder="Password" style="background:rgba(255,255,255,0.05);color:white;"><input id="modal-user-school" placeholder="School" style="background:rgba(255,255,255,0.05);color:white;"><button class="btn btn-primary" onclick="addUser()">Add</button><button class="btn btn-secondary" onclick="closeModal()">Cancel</button></div></div></div>
 </div>
 
 <script>
@@ -248,28 +245,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-
-// ========== PWA INSTALL (WORKING) ==========
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  let installBtn = document.getElementById('installPwaBtn');
-  if(installBtn) {
-    installBtn.style.display = 'inline-block';
-    installBtn.onclick = () => {
-      installBtn.style.display = 'none';
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-    };
-  }
-});
-
-window.addEventListener('appinstalled', () => {
-  let installBtn = document.getElementById('installPwaBtn');
-  if(installBtn) installBtn.style.display = 'none';
-  deferredPrompt = null;
-});
 
 // ========== PASSWORD RESET ==========
 function showForgotPassword() {
@@ -407,7 +382,7 @@ async function loadLeaderboard() {
       document.getElementById('student-rank').innerText = `#${idx+1}`;
     }
   });
-  html += `</tbody></table>`;
+  html += `</tbody></tr>`;
   
   if(currentUserRole === 'student') {
     document.getElementById('student-leaderboard').innerHTML = html;
@@ -486,23 +461,23 @@ function renderQuestionsList() {
   container.innerHTML = '';
   questionsBank.forEach((q, idx) => {
     let html = `<div class="card" style="margin-bottom:16px;"><h4>Question ${idx+1}</h4>`;
-    html += `<input type="text" id="qt_${idx}" placeholder="Question text" value="${(q.text||'').replace(/"/g,'&quot;')}">`;
-    html += `<input type="number" id="pts_${idx}" placeholder="Points" value="${q.points||1}">`;
+    html += `<input type="text" id="qt_${idx}" placeholder="Question text" value="${(q.text||'').replace(/"/g,'&quot;')}" style="background:rgba(255,255,255,0.05);color:white;">`;
+    html += `<input type="number" id="pts_${idx}" placeholder="Points" value="${q.points||1}" style="background:rgba(255,255,255,0.05);color:white;">`;
     if(q.type === 'mcq') {
-      for(let i=0;i<4;i++) html += `<input type="text" id="opt_${idx}_${i}" placeholder="Option ${String.fromCharCode(65+i)}" value="${q.options[i]||''}">`;
-      html += `<select id="cor_${idx}"><option value="0" ${q.correct==0?'selected':''}>A</option><option value="1" ${q.correct==1?'selected':''}>B</option><option value="2" ${q.correct==2?'selected':''}>C</option><option value="3" ${q.correct==3?'selected':''}>D</option></select>`;
+      for(let i=0;i<4;i++) html += `<input type="text" id="opt_${idx}_${i}" placeholder="Option ${String.fromCharCode(65+i)}" value="${q.options[i]||''}" style="background:rgba(255,255,255,0.05);color:white;">`;
+      html += `<select id="cor_${idx}" style="background:rgba(255,255,255,0.05);color:white;"><option value="0" ${q.correct==0?'selected':''}>A</option><option value="1" ${q.correct==1?'selected':''}>B</option><option value="2" ${q.correct==2?'selected':''}>C</option><option value="3" ${q.correct==3?'selected':''}>D</option></select>`;
     } else if(q.type === 'truefalse') {
-      html += `<select id="cor_${idx}"><option value="true" ${q.correct===true?'selected':''}>True</option><option value="false" ${q.correct===false?'selected':''}>False</option></select>`;
+      html += `<select id="cor_${idx}" style="background:rgba(255,255,255,0.05);color:white;"><option value="true" ${q.correct===true?'selected':''}>True</option><option value="false" ${q.correct===false?'selected':''}>False</option></select>`;
     } else if(q.type === 'fillblank') {
-      html += `<input type="text" id="cor_${idx}" placeholder="Correct answer" value="${q.correctAnswer||''}">`;
+      html += `<input type="text" id="cor_${idx}" placeholder="Correct answer" value="${q.correctAnswer||''}" style="background:rgba(255,255,255,0.05);color:white;">`;
     } else if(q.type === 'shortanswer') {
-      html += `<input type="text" id="cor_${idx}" placeholder="Keywords" value="${(q.keywords||[]).join(',')}">`;
+      html += `<input type="text" id="cor_${idx}" placeholder="Keywords" value="${(q.keywords||[]).join(',')}" style="background:rgba(255,255,255,0.05);color:white;">`;
     } else if(q.type === 'essay') {
       html += `<p style="color:#94a3b8;">📝 Essay question - Teacher grades manually</p>`;
     } else if(q.type === 'matching') {
-      html += `<div id="matching-${idx}"><div class="matching-pair"><input id="left_${idx}_0" placeholder="Left item"><span>⇔</span><input id="right_${idx}_0" placeholder="Right item"></div><button class="btn btn-secondary" onclick="addMatchingPair(${idx})">+ Add Pair</button></div>`;
+      html += `<div id="matching-${idx}"><div class="matching-pair"><input id="left_${idx}_0" placeholder="Left item" style="flex:2;background:rgba(255,255,255,0.05);color:white;"><span>⇔</span><input id="right_${idx}_0" placeholder="Right item" style="flex:2;background:rgba(255,255,255,0.05);color:white;"></div><button class="btn btn-secondary" onclick="addMatchingPair(${idx})">+ Add Pair</button></div>`;
     }
-    html += `<textarea id="exp_${idx}" rows="2" placeholder="Explanation">${q.explanation||''}</textarea>`;
+    html += `<textarea id="exp_${idx}" rows="2" placeholder="Explanation" style="background:rgba(255,255,255,0.05);color:white;">${q.explanation||''}</textarea>`;
     html += `<button class="btn btn-danger" onclick="removeQuestion(${idx})">Remove</button></div>`;
     container.innerHTML += html;
     
@@ -584,8 +559,8 @@ async function openGradeModal(resultId, studentId, quizId) {
       let currentGrade = (result.data().essayGrades && result.data().essayGrades[i]) || { points: 0, feedback: '' };
       html += `<div class="card"><h4>Question: ${questions[i].text}</h4>
       <p><strong>Answer:</strong> ${essayAnswers[i] || 'No answer'}</p>
-      <input type="number" id="grade_${i}" placeholder="Points" value="${currentGrade.points}" min="0" max="${questions[i].points}">
-      <textarea id="feedback_${i}" placeholder="Feedback">${currentGrade.feedback || ''}</textarea></div>`;
+      <input type="number" id="grade_${i}" placeholder="Points" value="${currentGrade.points}" min="0" max="${questions[i].points}" style="width:100px; display:inline-block; margin-right:10px;background:rgba(255,255,255,0.05);color:white;">
+      <textarea id="feedback_${i}" placeholder="Feedback" rows="2" style="background:rgba(255,255,255,0.05);color:white;">${currentGrade.feedback || ''}</textarea></div>`;
     }
   }
   currentGradingResult = { resultId, quiz: quiz.data(), result: result.data() };
@@ -672,18 +647,18 @@ function displayCurrentQuestion() {
     content += `<div><div class="quiz-option ${answers[currentQuestionIdx] === true ? 'selected' : ''}" onclick="selectTrueFalse(${currentQuestionIdx}, true)" data-value="true">✅ True</div>`;
     content += `<div class="quiz-option ${answers[currentQuestionIdx] === false ? 'selected' : ''}" onclick="selectTrueFalse(${currentQuestionIdx}, false)" data-value="false">❌ False</div></div>`;
   } else if(q.type === 'fillblank') {
-    content += `<input type="text" id="fill-${currentQuestionIdx}" placeholder="Your answer..." value="${answers[currentQuestionIdx] || ''}" onchange="saveFillAnswer(${currentQuestionIdx}, this.value)">`;
+    content += `<input type="text" id="fill-${currentQuestionIdx}" placeholder="Your answer..." value="${answers[currentQuestionIdx] || ''}" onchange="saveFillAnswer(${currentQuestionIdx}, this.value)" style="background:rgba(255,255,255,0.05);color:white;">`;
   } else if(q.type === 'shortanswer') {
-    content += `<textarea id="short-${currentQuestionIdx}" rows="3" placeholder="Your answer..." onchange="saveShortAnswer(${currentQuestionIdx}, this.value)">${answers[currentQuestionIdx] || ''}</textarea>`;
+    content += `<textarea id="short-${currentQuestionIdx}" rows="3" placeholder="Your answer..." onchange="saveShortAnswer(${currentQuestionIdx}, this.value)" style="background:rgba(255,255,255,0.05);color:white;">${answers[currentQuestionIdx] || ''}</textarea>`;
   } else if(q.type === 'essay') {
-    content += `<textarea id="essay-${currentQuestionIdx}" rows="5" placeholder="Your answer..." onchange="saveEssayAnswer(${currentQuestionIdx}, this.value)">${answers[currentQuestionIdx] || ''}</textarea>`;
+    content += `<textarea id="essay-${currentQuestionIdx}" rows="5" placeholder="Your answer..." onchange="saveEssayAnswer(${currentQuestionIdx}, this.value)" style="background:rgba(255,255,255,0.05);color:white;">${answers[currentQuestionIdx] || ''}</textarea>`;
   } else if(q.type === 'matching') {
     content += `<div class="matching-columns"><div class="matching-col-a"><strong>Column A</strong>`;
     q.leftItems.forEach(item => { content += `<div class="matching-item"><strong>${item.id}.</strong> ${item.text}</div>`; });
     content += `</div><div class="matching-col-b"><strong>Column B</strong>`;
     q.rightItems.forEach(item => { content += `<div class="matching-item"><strong>${item.id}.</strong> ${item.text}</div>`; });
     content += `</div></div>`;
-    content += `<input type="text" id="matching-${currentQuestionIdx}" placeholder="Matches (1=a,2=b)" value="${answers[currentQuestionIdx] || ''}" onchange="saveMatchingAnswer(${currentQuestionIdx}, this.value)">`;
+    content += `<input type="text" id="matching-${currentQuestionIdx}" placeholder="Matches (1=a,2=b)" value="${answers[currentQuestionIdx] || ''}" onchange="saveMatchingAnswer(${currentQuestionIdx}, this.value)" style="background:rgba(255,255,255,0.05);color:white;">`;
   }
   content += `</div>`;
   qDiv.innerHTML = content;
