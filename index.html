@@ -4,25 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="SmartSchool Pro - Complete Learning Management System with 6 Question Types, Leaderboard, Notifications, Live Chat, Schedule Quiz, Password Reset">
+  <meta name="keywords" content="LMS, Learning Management System, Online Quiz, Leaderboard, Notifications, Live Chat, Education, Rwanda, MCQ, Essay, Matching">
+  <meta name="author" content="SmartSchool Pro">
   <meta name="theme-color" content="#14b8a6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SmartSchool Pro">
-  <link rel="manifest" href="data:application/manifest+json,{
-    %22name%22:%22SmartSchool%20Pro%22,
-    %22short_name%22:%22SmartSchool%22,
-    %22start_url%22:%22.%22,
-    %22display%22:%22standalone%22,
-    %22background_color%22:%22%2314b8a6%22,
-    %22theme_color%22:%22%2314b8a6%22,
-    %22icons%22:[{
-      %22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E%22,
-      %22sizes%22:%22any%22,
-      %22type%22:%22image/svg+xml%22
-    }]
-  }">
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
-  <title>SmartSchool Pro | Complete LMS</title>
+  <title>SmartSchool Pro | Complete Learning Management System</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -102,6 +91,12 @@
     .nav-buttons{display:flex;justify-content:space-between;gap:10px;margin-top:20px;}
     .toast{position:fixed;bottom:20px;right:20px;background:rgba(20,184,166,0.9);color:white;padding:12px 20px;border-radius:40px;z-index:2000;animation:slideIn 0.3s ease;}
     @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+    .matching-pair{display:flex;gap:10px;margin-bottom:10px;align-items:center;}
+    .matching-columns{display:flex;gap:30px;margin-bottom:20px;flex-wrap:wrap;}
+    .matching-col-a{flex:1;background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;}
+    .matching-col-b{flex:1;background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;}
+    .matching-item{padding:10px;margin:8px 0;background:rgba(255,255,255,0.03);border-radius:8px;}
+    .explanation-box{background:rgba(34,197,94,0.1);border-left:4px solid #22c55e;padding:12px;margin-top:12px;border-radius:10px;}
     
     @media (max-width:768px){.type-selector{grid-template-columns:repeat(2,1fr);}}
   </style>
@@ -270,9 +265,9 @@ window.addEventListener('beforeinstallprompt', (e) => {
   }
 });
 
-// Also check if already installed
 window.addEventListener('appinstalled', () => {
-  document.getElementById('installPwaBtn').style.display = 'none';
+  let installBtn = document.getElementById('installPwaBtn');
+  if(installBtn) installBtn.style.display = 'none';
   deferredPrompt = null;
 });
 
@@ -334,21 +329,6 @@ async function loadChatMessages() {
 }
 
 // ========== NOTIFICATION FUNCTIONS ==========
-async function showNotification(message, type = 'info') {
-  await db.collection('notifications').add({
-    userId: currentUser.uid,
-    message: message,
-    type: type,
-    read: false,
-    createdAt: new Date()
-  });
-  let toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.innerHTML = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
-
 async function loadNotifications() {
   if(!currentUser) return;
   let notifications = await db.collection('notifications')
@@ -422,7 +402,7 @@ async function loadLeaderboard() {
     if(idx === 0) { rankClass = 'rank-1'; medal = '🥇 '; }
     else if(idx === 1) { rankClass = 'rank-2'; medal = '🥈 '; }
     else if(idx === 2) { rankClass = 'rank-3'; medal = '🥉 '; }
-    html += `<tr class="${rankClass}"><td><span class="medal">${medal}</span>${idx+1}</td><td>${s.name}</td><td>${Math.round(s.totalPoints)}</td><td>${s.quizzesTaken}</td><td>${Math.round(s.avgScore)}%</td></tr>`;
+    html += `<tr class="${rankClass}"><td><span class="medal">${medal}</span>${idx+1}</td><td><strong>${s.name}</strong></td><td>${Math.round(s.totalPoints)}</td><td>${s.quizzesTaken}</td><td>${Math.round(s.avgScore)}%</td></tr>`;
     if(currentUserRole === 'student' && s.id === currentUser.uid) {
       document.getElementById('student-rank').innerText = `#${idx+1}`;
     }
@@ -721,6 +701,8 @@ function saveMatchingAnswer(idx, val) { answers[idx] = val; }
 function selectTrueFalse(idx, val) { answers[idx] = val; displayCurrentQuestion(); }
 function selectAnswer(idx, val) { answers[idx] = val; displayCurrentQuestion(); }
 
+let quizTimer = null;
+
 async function startQuiz(quizId) {
   let doc = await db.collection('quizzes').doc(quizId).get();
   currentQuizData = { id: doc.id, ...doc.data() };
@@ -746,8 +728,6 @@ async function startQuiz(quizId) {
   }, 1000);
   document.getElementById('quiz-modal').style.display = 'flex';
 }
-
-let quizTimer = null;
 
 async function submitQuiz() {
   clearInterval(quizTimer);
