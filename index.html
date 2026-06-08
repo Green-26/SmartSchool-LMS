@@ -34,11 +34,12 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="SmartSchool Pro">
   
-  <!-- Favicon -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="manifest" href="/site.webmanifest">
+  <!-- Favicon - CORRECTED (removed leading slashes) -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="manifest" href="site.webmanifest">
   
   <title>SmartSchool Pro | Complete Learning Management System</title>
   
@@ -437,7 +438,7 @@ async function loadLeaderboard() {
       document.getElementById('student-rank').innerText = `#${idx+1}`;
     }
   });
-  html += `</tbody></table>`;
+  html += `</tbody></tr>`;
   
   if(currentUserRole === 'student') {
     document.getElementById('student-leaderboard').innerHTML = html;
