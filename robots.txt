@@ -1,5 +1,5 @@
 # robots.txt for SmartSchool Pro LMS
-# https://green-26.github.io/SmartSchool-LMS/robots.txt
+# https://green-26.github.io/SmartSchool-LMS/
 
 User-agent: *
 Allow: /
