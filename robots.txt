@@ -1,0 +1,8 @@
+# robots.txt for SmartSchool Pro LMS
+# https://green-26.github.io/SmartSchool-LMS/robots.txt
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://green-26.github.io/SmartSchool-LMS/sitemap.xml
