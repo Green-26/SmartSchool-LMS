@@ -1,4 +1,4 @@
-# Firebase config (contains API keys - DO NOT COMMIT)
+# Firebase config (contains API keys - DO NOT COMMIT to GitHub)
 config.js
 
 # OS generated files
@@ -10,19 +10,78 @@ config.js
 ehthumbs.db
 Thumbs.db
 *.swp
+*.swo
+*~
 
 # IDE files
 .vscode/
 .idea/
 *.sublime-*
+.project
+.classpath
 
 # Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
 # Environment variables
 .env
 .env.local
 .env.*.local
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# parcel-bundler cache
+.cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox
+
+# DynamoDB Local files
+.dynamodb/
